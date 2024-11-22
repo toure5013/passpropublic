@@ -2,15 +2,19 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Building2, User, Lock, Eye, EyeOff, Phone } from 'lucide-react';
 import useAuthStore from '../store/loginStore';
+import UserService from '../providers/userServices';
+import { useNavigate } from "react-router-dom";
 
 type UserType = 'public' | 'promoter';
 
 export default function Login() {
   const [userType, setUserType] = useState<UserType>('public');
   const [showPassword, setShowPassword] = useState(false);
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('0777372714');
+  const [password, setPassword] = useState('080208');
   const { login,updateUserInfo } = useAuthStore();
+
+  const navigate = useNavigate();
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '');
@@ -26,48 +30,61 @@ export default function Login() {
     if (value.length <= 7) return `${value.slice(0, 2)} ${value.slice(2, 5)} ${value.slice(5)}`;
     return `${value.slice(0, 2)} ${value.slice(2, 5)} ${value.slice(5, 7)} ${value.slice(7)}`;
   };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     // Validate phone number
     if (phone.length !== 10) {
       alert('Veuillez entrer un numéro de téléphone valide');
       return;
     }
+
     console.log('Login attempt:', { userType, phone, password });
 
-    //call the api to login user
-    /**
-     *"id": 170,
-        "uuid": "8aefa9c5-7ad6-429f-915e-c7f962b7be6b",
-        "name": "PATERNE",
-        "surname": "paterne",
-        "tel": "0777372714",
-        "birth_date": "1988-09-20",
-        "district_id": 1,
-        "login": "0777372714",
-        "sponsoring_code": "N4FKL5",
-        "mail": null,
-        "count_profile_modification": 1,
-        "device_token": "dgnL2g5iSfu_FVaj7J7s-P:APA91bE-IGTLN2qcI7w4sJFURCImXUYXBVwWYXvx9JM4-dbOjHFNuAinnYbLzM5A4UMpCSFBy9gir_irolXgFcKJhUrJCRBl0kwb57iOk0KbTnzQ0zhdPXAJCtuk3s-yUDXUWOa5HhG4",
-        "account_removed": 1,
-        "removed_at": null,
-        "status": 1,
-        "created_at": "2022-09-07T11:12:46.000000Z",
-        "updated_at": "2023-06-10T09:51:27.000000Z",
-        "solde": 99166030,
-        "wallet": {
-            "id": 10,
-            "balance": 99166030,
-            "balance_bonus": 8800,
-            "user_public_id": 170,
-            "created_at": "2022-09-07T11:12:46.000000Z",
-            "updated_at": "2024-11-01T14:16:54.000000Z"
+    try {
+      // Assuming login is a function that accepts phoneNumber and password, and returns user info
+      const response:any = await UserService.login({ login: phone, password });
+
+      if (response && response.user) {
+        const userInfo = response.user;
+
+        // Store user data in localStorage
+        localStorage.setItem('user_tel', userInfo.tel);
+        localStorage.setItem('user_uuid', userInfo.uuid);
+        localStorage.setItem('user_name', userInfo.name);
+        localStorage.setItem('user_surname', userInfo.surname);
+        localStorage.setItem('user', JSON.stringify(userInfo));
+
+        // Update the auth store with user information
+        updateUserInfo({
+          id: userInfo.id,
+          uuid: userInfo.uuid,
+          name: userInfo.name,
+          surname: userInfo.surname,
+        });
+
+        // update state
+        login()
+        updateUserInfo(userInfo);
+
+        // Navigate based on user status
+        if (userInfo.status === -1) {
+          console.log('Redirecting to OTP page...');
+          // Replace with actual redirection to OTP page
+
+        } else {
+          console.log('Redirecting to home page...');
+          // use router to redirect to home
+           navigate("/home");
         }
-     */
-    let userInfo:any = {}
-    updateUserInfo({id : userInfo.id, uuid : userInfo.uuid, name : userInfo.name, surname : userInfo.surname,})
-    login()
+      } else {
+        console.error('Login failed. Invalid response.');
+        alert('Erreur de connexion. Veuillez réessayer.');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Erreur de connexion. Veuillez réessayer.');
+    }
   };
 
   return (

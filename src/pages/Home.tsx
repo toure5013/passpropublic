@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Calendar, Users, TrendingUp, ArrowRight, Shield, CreditCard, Smartphone, Clock, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import EventCard from '../components/EventCard';
+import EventService from '../providers/eventService';
+import TicketService from '../providers/ticketService';
 
 const events = [
   {
@@ -53,9 +55,6 @@ const events = [
   }
 ];
 
-const categories = [
-  'Tous', 'Concerts', 'Festivals', 'Sport', 'Théâtre', 'Humour'
-];
 
 
 // Fixed data
@@ -105,8 +104,89 @@ export default function Home() {
   const [searchValue, setSearchValue] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tous');
 
+  const [events, setEvents] = useState<any[]>([]);
+  const [eventTypes, setEventTypes] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+
   // Filtrer les événements tendances
   const trendingEvents = events.filter(event => event.trending);
+
+
+  //API CALLS
+   // Function to search events based on the search key
+   const searchEvents = async (keys: string) => {
+    setIsLoading(true); // Show loading state
+
+    try {
+      const response = await EventService.searchEvents(keys);
+
+      if (response.status === 200) {
+        setEvents(response.data); // Set the event data if successful
+      } else {
+        setError('Failed to load events');
+      }
+    } catch (error) {
+      setError('An error occurred while fetching events');
+      console.error(error);
+    } finally {
+      setIsLoading(false); // Hide loading state
+    }
+  };
+
+  // Function to get event types and the first set of events
+  const getEventTypesWithFirstEvents = async () => {
+    setIsLoading(true); // Show loading state
+
+    try {
+      const response = await TicketService.getEventTypesWithFirstEvents();
+
+      if (response.status === 200) {
+        const data = response.data.data;
+
+        console.log("data");
+        console.log(data);
+        
+
+        if (data) {
+          setEventTypes(data.type_evenements || []);
+          setEvents(data.events?.items || []);
+        }
+      } else {
+        setError('Failed to load event types');
+      }
+    } catch (error) {
+      setError('An error occurred while fetching event types');
+      console.error(error);
+    } finally {
+      setIsLoading(false); // Hide loading state
+    }
+  };
+
+  // Function to get events by event type ID
+  const getEvents = async (id: string, eventType: string) => {
+    setIsLoading(true); // Show loading state
+
+    try {
+      const response = await EventService.getEvents();
+
+      if (response.status === 200) {
+        setEvents(response.data); // Set the event data if successful
+      } else {
+        setError('Failed to load events');
+      }
+    } catch (error) {
+      setError('An error occurred while fetching events');
+      console.error(error);
+    } finally {
+      setIsLoading(false); // Hide loading state
+    }
+  };
+
+  // Optionally, call the API when the component mounts
+  useEffect(() => {
+    getEventTypesWithFirstEvents(); // Call to get event types and first events
+  }, []); // Empty array ensures it only runs on component mount
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -174,21 +254,21 @@ export default function Home() {
       </div>
 
       <div className="max-w-lg mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        {/* Categories  */}
+        {/* eventTypes  */}
         <div className="flex overflow-x-auto gap-2 sm:gap-3 pb-3 sm:pb-4 mb-4 sm:mb-6 scrollbar-hide -mx-3 px-3">
-          {categories.map((category) => (
+          {eventTypes.map((category:any) => (
             <motion.button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
+              key={category.id}
+              onClick={() => setSelectedCategory(category.name)}
               className={`h-9 sm:h-10 px-4 sm:px-5 rounded-full whitespace-nowrap text-xs sm:text-sm font-medium transition-all duration-300 relative overflow-hidden flex items-center justify-center min-w-[80px] ${
-                selectedCategory === category 
+                selectedCategory === category.name 
                   ? 'text-white shadow-lg' 
                   : 'text-gray-700 bg-white shadow-sm hover:shadow-md'
               }`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <span className="relative z-10">{category}</span>
+              <span className="relative z-10">{category.name}</span>
               {selectedCategory === category && (
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end"

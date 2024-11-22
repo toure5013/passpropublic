@@ -1,7 +1,9 @@
 import axios, { AxiosResponse } from "axios";
+import { configService } from "./config";
 
 class PaiementService {
-  private static readonly baseURL = "https://your-base-url.com"; // Remplacez par votre URL
+  private static readonly baseURL = configService.apiBaseUrl; // Remplacez par votre URL
+ // Remplacez par votre URL
 
   // Méthode pour effectuer un cashout
   static async cashout(

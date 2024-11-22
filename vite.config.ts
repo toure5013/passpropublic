@@ -2,6 +2,13 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
+  /*
+  server: {
+    proxy: {
+      '/api': 'https://api.passpro.app:8894',
+    },
+  },
+  */
   plugins: [react()],
   optimizeDeps: {
     exclude: ['lucide-react']

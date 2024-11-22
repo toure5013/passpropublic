@@ -1,7 +1,9 @@
 import axios, { AxiosResponse, AxiosError } from "axios";
+import { configService } from "./config";
 
 class OrderService {
-  private static readonly baseURL = "https://your-base-url.com"; // Remplacez par votre URL
+  private static readonly baseURL = configService.apiBaseUrl; // Remplacez par votre URL
+ // Remplacez par votre URL
 
   // Création d'une commande
   static async createOrder(data: Record<string, any>): Promise<AxiosResponse> {

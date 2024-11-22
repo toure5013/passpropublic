@@ -1,7 +1,9 @@
 import axios, { AxiosResponse, AxiosError } from "axios";
+import { configService } from "./config";
 
 class EventService {
-  private static readonly baseURL = "https://your-base-url.com"; // Remplacez par votre URL
+  private static readonly baseURL = configService.apiBaseUrl; // Remplacez par votre URL
+ // Remplacez par votre URL
 
   static async getEvents(event_type_id?: number): Promise<AxiosResponse> {
     try {
@@ -68,6 +70,8 @@ class EventService {
       throw new Error("An unknown error occurred.");
     }
   }
+
+  
 }
 
 export default EventService;

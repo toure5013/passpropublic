@@ -1,4 +1,5 @@
 import axios, { AxiosResponse, AxiosError } from "axios";
+import { configService } from "./config";
 
 // Définir une interface pour les réponses courantes si nécessaire
 interface ApiResponse<T = any> {
@@ -8,7 +9,7 @@ interface ApiResponse<T = any> {
 }
 
 class UserService {
-  private static readonly baseURL = "https://your-base-url.com"; // Remplacez par votre URL
+  private static readonly baseURL = configService.apiBaseUrl; // Remplacez par votre URL
 
   static async login(data: Record<string, any>): Promise<ApiResponse> {
     try {

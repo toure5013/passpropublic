@@ -70,6 +70,7 @@ function AppContent() {
             <PageTransition key={location.pathname}>
               <Routes location={location}>
                 <Route path="/" element={<Home />} />
+                <Route path="/home" element={<Home />} />
                 <Route path="/event/:id" element={<EventDetails />} />
                 <Route path="/event/:id/booking" element={<EventBooking />} />
                 <Route path="/panier" element={<Cart />} />

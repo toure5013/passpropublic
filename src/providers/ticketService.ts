@@ -1,109 +1,88 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosResponse } from 'axios';
+import { configService } from './config';
 
+
+// Define the TicketService class
 class TicketService {
-  private static readonly baseURL = "https://your-base-url.com"; // Remplacez par votre URL
+  // Base URL from the config service
+  private static readonly baseURL = configService.apiBaseUrl;
 
-  // Obtenir des informations sur un ticket
-  static async getTicketInfos(data: Record<string, any>): Promise<AxiosResponse> {
+  // Method to get ticket information
+  static async getTicketIfnos(data: Record<string, any>): Promise<AxiosResponse> {
     try {
-      const response: AxiosResponse = await axios.post(
-        `${this.baseURL}/api/tickets/passOrder`,
-        data
-      );
+      const response = await axios.post(`${this.baseURL}/api/tickets/passOrder`, data);
       return response;
-    } catch (error) {
-      return this.handleError(error);
+    } catch (error: any) {
+      console.error("Error: ", error?.response?.data);
+      return error.response;
     }
   }
 
-  // Acheter un ticket
+  // Method to buy a ticket
   static async buyTicket(data: Record<string, any>): Promise<AxiosResponse> {
     try {
-      const response: AxiosResponse = await axios.post(
-        `${this.baseURL}/api/ticket/buy`,
-        data
-      );
+      const response = await axios.post(`${this.baseURL}/api/ticket/buy`, data);
       return response;
-    } catch (error) {
-      return this.handleError(error);
+    } catch (error: any) {
+      console.error("Error: ", error?.response?.data);
+      return error.response;
     }
   }
 
-  // Partager un ticket
+  // Method to share a ticket
   static async shareTicket(data: Record<string, any>): Promise<AxiosResponse> {
     try {
-      const response: AxiosResponse = await axios.post(
-        `${this.baseURL}/api/tickets/giveProperty`,
-        data
-      );
+      const response = await axios.post(`${this.baseURL}/api/tickets/giveProperty`, data);
       return response;
-    } catch (error) {
-      return this.handleError(error);
+    } catch (error: any) {
+      console.error("Error: ", error?.response?.data);
+      return error.response;
     }
   }
 
-  // Déclarer un ticket perdu
+  // Method to set a ticket as lost
   static async setTicketLost(data: Record<string, any>): Promise<AxiosResponse> {
     try {
-      const response: AxiosResponse = await axios.post(
-        `${this.baseURL}/api/setTicketLost`,
-        data
-      );
+      const response = await axios.post(`${this.baseURL}/api/setTicketLost`, data);
       return response;
-    } catch (error) {
-      return this.handleError(error);
+    } catch (error: any) {
+      console.error("Error: ", error?.response?.data);
+      return error.response;
     }
   }
 
-  // Authentifier un ticket
+  // Method to authenticate a ticket
   static async authenticateMyTicket(data: Record<string, any>): Promise<AxiosResponse> {
     try {
-      const response: AxiosResponse = await axios.post(
-        `${this.baseURL}/api/tickets/authenticateMyTicket`,
-        data
+      const response = await axios.post(`${this.baseURL}/api/tickets/authenticateMyTicket`, data);
+      return response;
+    } catch (error: any) {
+      console.error("Error: ", error?.response?.data);
+      return error.response;
+    }
+  }
+
+  // Method to get a user's tickets based on event type ID
+  static async getMyTickets(event_type_id: number, userUuid: string): Promise<AxiosResponse> {
+    try {
+      const response = await axios.get(
+        `${this.baseURL}/api/users/${userUuid}/tickets?event_type_id=${event_type_id}`
       );
       return response;
-    } catch (error) {
-      return this.handleError(error);
+    } catch (error: any) {
+      console.error("Error: ", error?.response?.data);
+      return error.response;
     }
   }
 
-  // Récupérer les tickets d'un utilisateur
-  static async getMyTickets(
-    userUuid: string,
-    eventTypeId?: number
-  ): Promise<AxiosResponse> {
-    const url = `${this.baseURL}/api/users/${userUuid}/tickets${
-      eventTypeId ? `?event_type_id=${eventTypeId}` : ""
-    }`;
-    try {
-      const response: AxiosResponse = await axios.get(url);
-      return response;
-    } catch (error) {
-      return this.handleError(error);
-    }
-  }
-
-  // Obtenir les types d'événements avec leurs premiers événements
+  // Method to get event types along with the first event
   static async getEventTypesWithFirstEvents(): Promise<AxiosResponse> {
     try {
-      const response: AxiosResponse = await axios.get(
-        `${this.baseURL}/api/eventTypeWithBaseEvent`
-      );
+      const response = await axios.get(`${this.baseURL}/api/eventTypeWithBaseEvent`);
       return response;
-    } catch (error) {
-      return this.handleError(error);
-    }
-  }
-
-  // Gestion centralisée des erreurs
-  private static handleError(error: unknown): never {
-    if (axios.isAxiosError(error) && error.response) {
-      console.error("Error Response :::", error.response.data);
-      throw error.response;
-    } else {
-      console.error("Unknown Error :::", error);
-      throw new Error("An unknown error occurred.");
+    } catch (error: any) {
+      console.error("Error: ", error?.response?.data);
+      return error.response;
     }
   }
 }
