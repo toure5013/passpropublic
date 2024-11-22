@@ -149,7 +149,7 @@ export default function Home() {
         
 
         if (data) {
-          setEventTypes(data.type_evenements || []);
+          setEventTypes(["Tous", ...data.type_evenements]);
           setEvents(data.events?.items || []);
         }
       } else {
@@ -269,7 +269,7 @@ export default function Home() {
               whileTap={{ scale: 0.95 }}
             >
               <span className="relative z-10">{category.name}</span>
-              {selectedCategory === category && (
+              {selectedCategory === category.name && (
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end"
                   initial={{ opacity: 0 }}
@@ -279,7 +279,7 @@ export default function Home() {
               )}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end opacity-0 hover:opacity-100 transition-opacity"
-                style={{ opacity: selectedCategory === category ? 1 : 0 }}
+                style={{ opacity: selectedCategory === category.name ? 1 : 0 }}
               />
             </motion.button>
           ))}
