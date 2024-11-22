@@ -149,7 +149,7 @@ export default function Home() {
         
 
         if (data) {
-          setEventTypes(["Tous", ...data.type_evenements]);
+          setEventTypes([{id:0,name : "Tous"   }, ...data.type_evenements]);
           setEvents(data.events?.items || []);
         }
       } else {
