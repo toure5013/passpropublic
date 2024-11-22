@@ -1,0 +1,65 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Custom Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom Styles */
+.event-card {
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.featured-event {
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+/* Categories Slider */
+.categories-slider {
+    overflow: hidden;
+    padding: 1rem 0;
+}
+
+.swiper-slide {
+    width: auto;
+}
+
+/* Hover Effects */
+.event-card:hover img {
+    transform: scale(1.05);
+    transition: transform 0.3s ease-out;
+}
+
+/* Page Transition */
+#page-transition {
+    transform: translateX(100%);
+}
+
+/* Custom Colors */
+:root {
+    --color-brand-red: #D43530;
+    --color-brand-yellow: #F8BF0E;
+    --color-brand-gradient-start: #FF8A00;
+    --color-brand-gradient-end: #D43530;
+}
+
+/* Gradient Text */
+.text-gradient {
+    background: linear-gradient(to right, var(--color-brand-gradient-start), var(--color-brand-gradient-end));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}

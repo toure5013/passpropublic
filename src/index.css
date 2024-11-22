@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    font-family: 'Inter', system-ui, sans-serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    @apply antialiased;
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Style personnalisé pour les champs de saisie */
+  input[type="text"],
+  input[type="tel"],
+  input[type="email"],
+  input[type="number"],
+  input[type="search"],
+  textarea {
+    @apply bg-white border border-gray-200 rounded-lg px-3 py-2 outline-none transition-colors duration-200;
+  }
+
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  textarea:focus {
+    @apply border-gray-300;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .text-shadow {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Optimisations pour le texte sur mobile */
+@media screen and (max-width: 640px) {
+  body {
+    letter-spacing: -0.01em;
+  }
+
+  .text-mobile-sharp {
+    -webkit-font-smoothing: subpixel-antialiased;
+    -moz-osx-font-smoothing: auto;
+    font-feature-settings: 'kern' 1;
+    text-rendering: optimizeLegibility;
+  }
+  
+  input, textarea, select, button {
+    font-size: 16px !important;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Amélioration de la netteté du texte */
+  .text-mobile-crisp {
+    text-rendering: geometricPrecision;
+  }
+
+  /* Augmentation de la taille des textes sur mobile */
+  .text-xs {
+    font-size: 0.8125rem !important;
+    line-height: 1.125rem !important;
+  }
+
+  .text-sm {
+    font-size: 0.9375rem !important;
+    line-height: 1.375rem !important;
+  }
+
+  .text-base {
+    font-size: 1rem !important;
+    line-height: 1.5rem !important;
+  }
+
+  /* Amélioration du contraste des textes */
+  .text-gray-500 {
+    color: #64748b !important;
+  }
+
+  .text-gray-600 {
+    color: #475569 !important;
+  }
+}
+
+/* Amélioration de la lisibilité sur les fonds clairs */
+.text-on-light {
+  @apply text-gray-900;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* Classes d'optimisation mobile */
+.mobile-text {
+  @apply text-mobile-sharp text-mobile-crisp;
+}
+
+.mobile-touch-target {
+  @apply min-h-[44px] min-w-[44px];
+}
+
+/* Amélioration du rendu des polices */
+* {
+  -webkit-font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  font-variant-ligatures: common-ligatures contextual;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
