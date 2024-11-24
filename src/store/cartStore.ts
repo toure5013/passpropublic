@@ -24,7 +24,7 @@ interface CartStore {
   removePromoCode: () => void;
 }
 
-const PROMO_CODES = {
+const PROMO_CODES:any = {
   'WELCOME': 10, // 10% de réduction
   'SUMMER': 15, // 15% de réduction
   'VIP': 20, // 20% de réduction

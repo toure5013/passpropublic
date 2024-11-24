@@ -5,7 +5,7 @@ class EventService {
   private static readonly baseURL = configService.apiBaseUrl; // Remplacez par votre URL
  // Remplacez par votre URL
 
-  static async getEvents(event_type_id?: number): Promise<AxiosResponse> {
+  static async getEventByTypeId(event_type_id?: number,): Promise<AxiosResponse> {
     try {
       const url = event_type_id
         ? `${this.baseURL}/api/events?event_type_id=${event_type_id}`

@@ -1,17 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Heart, MapPin, Calendar, AlertCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useWishlistStore } from '../store/wishlistStore';
 import { useSessionStore } from '../store/sessionStore';
 import ImageLoader from './ImageLoader';
+import { configService } from '../providers/config';
+import { useEventStore } from '../store/eventStore';
 
 interface EventCardProps {
   id: string;
   title: string;
   date: string;
   location: string;
-  image: string;
+  event_ticket_img : string,
   price: string;
   className?: string;
   availableTickets?: number;
@@ -19,12 +21,18 @@ interface EventCardProps {
 }
 
 export default function EventCard({ 
-  id, title, date, location, image, price, className = '',
+  id, title, date, location, event_ticket_img, price, className = '',
   availableTickets = 100, totalTickets = 100
 }: EventCardProps) {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore();
   const { addViewedEvent } = useSessionStore();
   const isWishlisted = isInWishlist(id);
+  const { currentEvent } = useEventStore();
+  const navigate = useNavigate();
+  
+  let image = configService.baseUrlImage + event_ticket_img
+
+  console.log(image)
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -39,6 +47,7 @@ export default function EventCard({
 
   const handleCardClick = () => {
     addViewedEvent(id);
+    navigate(`/event/${id}/booking`);
   };
 
   const getAvailabilityStatus = () => {
@@ -63,6 +72,8 @@ export default function EventCard({
 
   const availabilityStatus = getAvailabilityStatus();
 
+
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -70,9 +81,9 @@ export default function EventCard({
       whileHover={{ y: -5 }}
       transition={{ duration: 0.3 }}
     >
-      <Link 
-        to={`/event/${id}/booking`}
-        onClick={handleCardClick}
+      <div 
+        // to={`/event/${id}/booking`}
+        onClick={(e) => handleCardClick()}
         className={`block bg-white rounded-lg shadow-sm overflow-hidden transition-all hover:shadow-md ${className}`}
       >
         <div className="relative">
@@ -136,7 +147,7 @@ export default function EventCard({
             </motion.button>
           </div>
         </div>
-      </Link>
+      </div>
     </motion.div>
   );
 }
