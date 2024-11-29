@@ -5,16 +5,15 @@ import BackButton from "../components/BackButton";
 import EventCardPromoter from "../components/PromoterDashboard/EventCardPromoter";
 import DashboardMenu from "../components/PromoterDashboard/DashboardMenu";
 import SalesStats from "../components/PromoterDashboard/SalesStats";
-import CategorySales from "../components/PromoterDashboard/CategorySales";
 import SellerDetails from "../components/PromoterDashboard/SellerDetails";
 import SalesHistory from "../components/PromoterDashboard/SalesHistory";
 import { useEventStore } from "../store/eventStore";
 import EventService from "../providers/eventService";
-import { MyCustomEvent } from "../utils/eventtypes";
-import PromoterEventService from "../providers/promoters/promotereventService";
 import { PromoterStatsType } from "../utils/promotertypes";
 import useAuthStore from "../store/loginStore";
 import { useNavigate } from "react-router-dom";
+import PromoterEventService from "../providers/promoters/promoterEventService";
+import { toast } from "react-toastify";
 
 // Mock data
 
@@ -25,11 +24,9 @@ export default function PromoterDashboard() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showAddSellerForm, setShowAddSellerForm] = useState(false);
   const [newSeller, setNewSeller] = useState({ name: "", quota: "" });
-  const [eventTypes, setEventTypes] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [eventStats, setEventStats] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
   const { updateEvent } = useEventStore();
   const navigate = useNavigate();
 
@@ -54,10 +51,10 @@ export default function PromoterDashboard() {
           setEventStats(response.data.data || []);
         }
       } else {
-        setError("Failed to load event types");
+        toast.error("Failed to load event types");
       }
     } catch (error) {
-      setError("An error occurred while fetching event types");
+      toast.error("An error occurred while fetching event types");
       console.error(error);
     } finally {
       setIsLoading(false); // Hide loading state
@@ -75,10 +72,10 @@ export default function PromoterDashboard() {
         updateEvent(response.data || []);
         setEvents(response.data || []);
       } else {
-        setError("Failed to load event types");
+        toast.error("Failed to load event types");
       }
     } catch (error) {
-      setError("An error occurred while fetching event types");
+      toast.error("An error occurred while fetching event types");
       console.error(error);
     } finally {
       setIsLoading(false); // Hide loading state

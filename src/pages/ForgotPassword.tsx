@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Phone, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 type Step = 'phone' | 'otp' | 'password';
 
@@ -53,7 +54,7 @@ export default function ForgotPassword() {
   const handleSubmitPhone = (e: React.FormEvent) => {
     e.preventDefault();
     if (phone.length !== 10) {
-      alert('Veuillez entrer un numéro de téléphone valide');
+      toast('Veuillez entrer un numéro de téléphone valide');
       return;
     }
     // TODO: Send OTP to phone number
@@ -64,7 +65,7 @@ export default function ForgotPassword() {
     e.preventDefault();
     const otpValue = otp.join('');
     if (otpValue.length !== 6) {
-      alert('Veuillez entrer le code complet');
+      toast('Veuillez entrer le code complet');
       return;
     }
     // TODO: Verify OTP
@@ -74,11 +75,11 @@ export default function ForgotPassword() {
   const handleSubmitPassword = (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert('Les mots de passe ne correspondent pas');
+      toast('Les mots de passe ne correspondent pas');
       return;
     }
     if (password.length < 6) {
-      alert('Le mot de passe doit contenir au moins 6 caractères');
+      toast('Le mot de passe doit contenir au moins 6 caractères');
       return;
     }
     // TODO: Update password

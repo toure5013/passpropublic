@@ -13,6 +13,7 @@ import useAuthStore from "../store/loginStore";
 import UserService from "../providers/userServices";
 import { Link, useNavigate } from "react-router-dom";
 import promoterUserService from "../providers/promoters/promoterUserService";
+import { toast } from "react-toastify";
 
 type UserType = "public" | "promoter";
 
@@ -80,15 +81,18 @@ export default function Login() {
       // Navigate based on user status
       if (userInfo.status === -1) {
         console.log("Redirecting to OTP page...");
+        toast.error(response["message"]);
         // Replace with actual redirection to OTP page
       } else {
         console.log("Redirecting to home page...");
+        toast.success(response["message"]);
         // use router to redirect to home
         navigate("/home");
       }
     } else {
-      console.error("Login failed. Invalid response.");
-      alert("Erreur de connexion. Veuillez réessayer.");
+      console.log("response")
+      console.log(response["message"])
+      toast.error(response["message"]);
     }
   };
 
@@ -103,16 +107,12 @@ export default function Login() {
     if (response.status === 200) {
       const userInfo = response.data;
       if (!userInfo || !userInfo.success) {
-        alert(
-          "Nous ne parvenons à trouver votre compte. Si vous penssez que cela est un erreur, veuillez contacter l'administrateur."
-        );
+        toast.error("Erreur de connexion. Veuillez réessayer.");
         return;
       }
       if (userInfo.status === -1) {
-        console.log("Redirecting to OTP page...");
-        alert(
-          "Vous n'avez pas encore d'accès. Veuillez contacter l'administrateur."
-        );
+        toast.error(
+          "Vous n'avez pas encore d'accès. Veuillez contacter l'administrateur.")
         return;
       }
 
@@ -135,8 +135,7 @@ export default function Login() {
       // Navigate based on user status
       navigate("/espace-promoteur");
     } else {
-      console.error("Login failed. Invalid response.");
-      alert("Erreur de connexion. Veuillez réessayer.");
+      toast.error('Erreur de connexion. Veuillez réessayer.');
     }
   };
 

@@ -26,6 +26,9 @@ import PromoterDashboard from './pages/PromoterDashboard';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 function ScrollToTop() {
   const location = useLocation();
   const updateLastVisit = useSessionStore(state => state.updateLastVisit);
@@ -50,6 +53,8 @@ function AppContent() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F9F9F9] relative">
+        <ToastContainer />
+
       <div 
         className="fixed inset-0 pointer-events-none z-0"
         style={{
@@ -63,6 +68,7 @@ function AppContent() {
       
       <div className="relative z-10 flex flex-col min-h-screen">
         <Navbar />
+
         {showProgress && <CheckoutProgress currentStep={currentStep} />}
         
         <main className="flex-grow">
