@@ -2,10 +2,10 @@ import create from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface CartItem {
-  eventId: string;
+  eventId: number;
   eventTitle: string;
-  categoryId: string;
-  categoryName: string;
+  ticketPriceId: number;
+  price_label: string;
   quantity: number;
   price: number;
 }
@@ -15,8 +15,8 @@ interface CartStore {
   promoCode: string | null;
   promoDiscount: number;
   addToCart: (item: CartItem) => void;
-  removeFromCart: (eventId: string, categoryId: string) => void;
-  updateQuantity: (eventId: string, categoryId: string, quantity: number) => void;
+  removeFromCart: (eventId: number, ticketPriceId: number) => void;
+  updateQuantity: (eventId: number, ticketPriceId: number, quantity: number) => void;
   clearCart: () => void;
   getTotal: () => number;
   getFinalTotal: () => number;
@@ -40,14 +40,14 @@ export const useCartStore = create<CartStore>()(
       addToCart: (item) => {
         set((state) => {
           const existingItem = state.items.find(
-            i => i.eventId === item.eventId && i.categoryId === item.categoryId
+            i => i.eventId === item.eventId && i.ticketPriceId === item.ticketPriceId
           );
 
           if (existingItem) {
             return {
               ...state,
               items: state.items.map(i =>
-                i.eventId === item.eventId && i.categoryId === item.categoryId
+                i.eventId === item.eventId && i.ticketPriceId === item.ticketPriceId
                   ? { ...i, quantity: i.quantity + item.quantity }
                   : i
               )
@@ -58,20 +58,20 @@ export const useCartStore = create<CartStore>()(
         });
       },
 
-      removeFromCart: (eventId, categoryId) => {
+      removeFromCart: (eventId, ticketPriceId) => {
         set((state) => ({
           ...state,
           items: state.items.filter(
-            i => !(i.eventId === eventId && i.categoryId === categoryId)
+            i => !(i.eventId == eventId && i.ticketPriceId == ticketPriceId)
           )
         }));
       },
 
-      updateQuantity: (eventId, categoryId, quantity) => {
+      updateQuantity: (eventId, ticketPriceId, quantity) => {
         set((state) => ({
           ...state,
           items: state.items.map(item =>
-            item.eventId === eventId && item.categoryId === categoryId
+            item.eventId == eventId && item.ticketPriceId == ticketPriceId
               ? { ...item, quantity }
               : item
           )

@@ -4,6 +4,10 @@ import { Minus, Plus, Trash2, Tag, X } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import ImageLoader from '../components/ImageLoader';
+import { MyCustomEvent } from '../utils/eventtypes';
+import { useEventStore } from '../store/eventStore';
+import { configService } from '../providers/configService';
+import { use } from 'framer-motion/client';
 
 export default function Cart() {
   const { 
@@ -20,6 +24,14 @@ export default function Cart() {
 
   const [promoInput, setPromoInput] = useState('');
   const [promoError, setPromoError] = useState('');
+  const [event, setEvent] = React.useState<MyCustomEvent>({} as MyCustomEvent);
+  const { getEventById } = useEventStore();
+
+  
+  function getEventByIdAsync(id: number) {
+    const _event:MyCustomEvent =  getEventById(+id);
+    return _event;
+  }
 
   const handleApplyPromo = () => {
     if (!promoInput.trim()) {
@@ -34,30 +46,6 @@ export default function Cart() {
     } else {
       setPromoError('Code promo invalide');
     }
-  };
-
-  const getEventCover = (eventId: string) => {
-    // Map event IDs to their cover images
-    const coverMap: Record<string, string> = {
-      '1': 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14',
-      '2': 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3',
-      '3': 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a',
-      '4': 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3',
-      '5': 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec'
-    };
-    return coverMap[eventId] || coverMap['1'];
-  };
-
-  const getEventName = (eventId: string) => {
-    // Map event IDs to their names
-    const nameMap: Record<string, string> = {
-      '1': 'DJ Arafat en concert',
-      '2': 'Festival des Musiques Urbaines',
-      '3': 'Concert Alpha Blondy',
-      '4': 'Festival d\'Abidjan',
-      '5': 'Magic System Live'
-    };
-    return nameMap[eventId] || 'Événement';
   };
 
   if (items.length === 0) {
@@ -98,7 +86,7 @@ export default function Cart() {
           <div className="space-y-3 sm:space-y-4">
             {items.map((item) => (
               <motion.div 
-                key={`${item.eventId}-${item.categoryId}`}
+                key={`${item.eventId}-${item.ticketPriceId}`}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
@@ -107,8 +95,8 @@ export default function Cart() {
                 <div className="flex gap-2 p-2 sm:p-3">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-lg overflow-hidden">
                     <ImageLoader
-                      src={getEventCover(item.eventId)}
-                      alt={getEventName(item.eventId)}
+                       src={configService.baseUrlImage + getEventByIdAsync(item.eventId).event_ticket_img}
+                       alt={getEventByIdAsync(item.eventId).event_name}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -117,14 +105,14 @@ export default function Cart() {
                     <div className="flex justify-between items-start">
                       <div className="min-w-0">
                         <h3 className="text-sm font-semibold text-gray-900 mb-0.5 truncate">
-                          {getEventName(item.eventId)}
+                          {getEventByIdAsync(item.eventId).event_name}
                         </h3>
                         <p className="text-xs text-gray-600 mb-2">
-                          Catégorie: {item.categoryName}
+                          Catégorie: {item.price_label}
                         </p>
                       </div>
                       <button
-                        onClick={() => removeFromCart(item.eventId, item.categoryId)}
+                        onClick={() => removeFromCart(item.eventId, item.ticketPriceId)}
                         className="text-gray-400 hover:text-gray-500 ml-2"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -134,7 +122,7 @@ export default function Cart() {
                     <div className="flex justify-between items-center">
                       <div className="flex items-center space-x-2">
                         <button
-                          onClick={() => updateQuantity(item.eventId, item.categoryId, item.quantity - 1)}
+                          onClick={() => updateQuantity(item.eventId, item.ticketPriceId, item.quantity - 1)}
                           className="p-1 rounded-md hover:bg-gray-100"
                           disabled={item.quantity <= 1}
                         >
@@ -144,7 +132,7 @@ export default function Cart() {
                           {item.quantity}
                         </span>
                         <button
-                          onClick={() => updateQuantity(item.eventId, item.categoryId, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.eventId, item.ticketPriceId, item.quantity + 1)}
                           className="p-1 rounded-md hover:bg-gray-100"
                           disabled={item.quantity >= 10}
                         >

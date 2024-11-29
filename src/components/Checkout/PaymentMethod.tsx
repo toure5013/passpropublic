@@ -6,7 +6,7 @@ interface PaymentMethodProps {
   amount: number;
   onPaymentComplete: (method: string) => void;
 }
-
+ 
 interface PaymentOption {
   id: string;
   name: string;
@@ -18,7 +18,7 @@ const paymentOptions: PaymentOption[] = [
   {
     id: 'card',
     name: 'Carte bancaire',
-    icon: '/assets/images/payments/visa-mastercard.png',
+    icon: '/assets/images/payments/bank-card.png',
     color: 'bg-blue-500'
   },
   {

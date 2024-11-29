@@ -2,19 +2,19 @@ import create from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface WishlistItem {
-  id: string;
+  id: number;
   title: string;
   date: string;
   location: string;
   image: string;
-  price: string;
+  price: number;
 }
 
 interface WishlistStore {
   items: WishlistItem[];
   addToWishlist: (item: WishlistItem) => void;
-  removeFromWishlist: (id: string) => void;
-  isInWishlist: (id: string) => boolean;
+  removeFromWishlist: (id: number) => void;
+  isInWishlist: (id: number) => boolean;
 }
 
 export const useWishlistStore = create<WishlistStore>()(

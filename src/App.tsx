@@ -21,7 +21,7 @@ import Help from './pages/Help';
 import Contact from './pages/Contact';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
-import PromoterPage from './pages/PromoterPage';
+import BecomePromoterPage from './pages/BecomePromoterPage';
 import PromoterDashboard from './pages/PromoterDashboard';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
@@ -79,25 +79,16 @@ function AppContent() {
                 <Route path="/paiement/erreur" element={<PaymentError />} />
                 <Route path="/wishlist" element={<Wishlist />} />
                 <Route path="/tickets" element={<Tickets />} />
-                <Route path="/tickets/:id" element={<TicketView ticket={{
-                  id: '1',
-                  eventTitle: 'DJ Arafat en concert',
-                  date: '31 Juillet 2024',
-                  time: '19:00',
-                  location: 'Palais de la culture d\'Abidjan',
-                  ticketType: 'VIP',
-                  qrCode: 'TICKET-001-2024',
-                  coverImage: 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14',
-                  price: '15000 F CFA'
-                }} />} />
+                <Route path="/tickets/:id" element={<TicketView  />} />
                 <Route path="/aide" element={<Help />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/conditions" element={<Terms />} />
                 <Route path="/confidentialite" element={<Privacy />} />
-                <Route path="/devenir-promoteur" element={<PromoterPage />} />
+                <Route path="/devenir-promoteur" element={<BecomePromoterPage />} />
                 <Route path="/espace-promoteur" element={<PromoterDashboard />} />
                 <Route path="/connexion" element={<Login />} />
                 <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
+                <Route path="/*" element={<Home />} />
               </Routes>
             </PageTransition>
           </AnimatePresence>

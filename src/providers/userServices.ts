@@ -1,5 +1,5 @@
 import axios, { AxiosResponse, AxiosError } from "axios";
-import { configService } from "./config";
+import { configService } from "./configService";
 
 // Définir une interface pour les réponses courantes si nécessaire
 interface ApiResponse<T = any> {

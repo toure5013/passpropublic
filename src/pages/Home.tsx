@@ -71,29 +71,57 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
-  const { updateEvent} = useEventStore();
+  const { updateEvent } = useEventStore();
 
   // Filtrer les événements tendances
   const trendingEvents = events.filter((event) => event.trending);
 
   //API CALLS
   // Function to search events based on the search key
-  const searchEvents = async (event_type_name: string) => {
+  const searchEvents = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(e.target.value);
+
+    if (searchValue.length >= 3) {
+      setIsLoading(true); // Show loading state
+      try {
+        const response: any = await EventService.searchEvents(searchValue);
+
+        // console.log(response);
+
+        if (response.status === 200) {
+          setEvents(response.data || []);
+        } else {
+          setError("Failed to load events");
+        }
+      } catch (error) {
+        setError("An error occurred while fetching events");
+        console.error(error);
+      } finally {
+        setIsLoading(false); // Hide loading state
+      }
+    } else if (searchValue.length == 0) {
+      getEventTypesWithFirstEvents();
+    }
+  };
+
+  const getAllEventsAsync = async () => {
     setIsLoading(true); // Show loading state
 
     try {
-      const response: any = await EventService.searchEvents(event_type_name);
+      const response = await EventService.getAllEvents();
 
       if (response.status === 200) {
-        console.log("event_type_name");
-        console.log(event_type_name);
-        console.log(response?.events?.items || []);
-        setEvents(response?.events?.items || []);
+          localStorage.setItem(
+            "allEvents",
+            JSON.stringify(response.data || [])
+          );
+          updateEvent(response.data || []);
+          setEvents(response.data || []);
       } else {
-        setError("Failed to load events");
+        setError("Failed to load event types");
       }
     } catch (error) {
-      setError("An error occurred while fetching events");
+      setError("An error occurred while fetching event types");
       console.error(error);
     } finally {
       setIsLoading(false); // Hide loading state
@@ -105,17 +133,20 @@ export default function Home() {
     setIsLoading(true); // Show loading state
 
     try {
-      const response = await TicketService.getEventTypesWithFirstEvents();
+      const response = await EventService.getEventTypesWithFirstEvents();
 
       if (response.status === 200) {
         const data = response.data.data;
 
-        console.log("data");
-        console.log(data);
-
         if (data) {
-          localStorage.setItem("eventTypes", JSON.stringify(data.type_evenements));
-          localStorage.setItem("allEvents", JSON.stringify(data.events?.items || []));
+          localStorage.setItem(
+            "eventTypes",
+            JSON.stringify(data.type_evenements)
+          );
+          localStorage.setItem(
+            "allEvents",
+            JSON.stringify(data.events?.items || [])
+          );
           setEventTypes([{ id: 0, name: "Tous" }, ...data.type_evenements]);
           updateEvent(data.events?.items || []);
           setEvents(data.events?.items || []);
@@ -139,10 +170,7 @@ export default function Home() {
       const response = await EventService.getEventByTypeId(id);
 
       if (response.status === 200) {
-        console.log("response.data events");
-        console.log(events);
         setEvents(response.data); // Set the event data if successful
-        console.log(events);
       } else {
         setError("Failed to load events");
       }
@@ -190,7 +218,9 @@ export default function Home() {
                 type="text"
                 placeholder="Rechercher un événement..."
                 value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
+                onChange={(e) => {
+                  searchEvents(e);
+                }}
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
                 className="w-full h-12 rounded-xl text-gray-900 placeholder-gray-500 relative z-10 bg-transparent border-2 border-transparent focus:border-brand-yellow/30 transition-all duration-300 outline-none text-base pl-6 pr-16"
@@ -235,6 +265,9 @@ export default function Home() {
                 if (category.name !== "Tout" && category.name !== "Tous") {
                   getEventByTypeId(category.id);
                 } else {
+                  if (category.name == "Tout" || category.name == "Tous") {
+                    getAllEventsAsync();
+                  }
                   getEventTypesWithFirstEvents();
                 }
               }}

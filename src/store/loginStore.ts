@@ -23,6 +23,8 @@ const useAuthStore = create(
                 const walletLocalStorage = localStorage.getItem('user_wallet');
                 //check if user is logged in and set the state
                 if (userLocalStorage && userInfo !== null) {
+                    console.log('loggedin');
+                    
                     set({ isLoggedIn: true });
                     set({ userInfo });
                     set({ wallet: walletLocalStorage ? JSON.parse(walletLocalStorage) : null });

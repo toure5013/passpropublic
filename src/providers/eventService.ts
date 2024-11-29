@@ -1,11 +1,13 @@
 import axios, { AxiosResponse, AxiosError } from "axios";
-import { configService } from "./config";
+import { configService } from "./configService";
 
 class EventService {
   private static readonly baseURL = configService.apiBaseUrl; // Remplacez par votre URL
- // Remplacez par votre URL
+  // Remplacez par votre URL
 
-  static async getEventByTypeId(event_type_id?: number,): Promise<AxiosResponse> {
+  static async getEventByTypeId(
+    event_type_id?: number
+  ): Promise<AxiosResponse> {
     try {
       const url = event_type_id
         ? `${this.baseURL}/api/events?event_type_id=${event_type_id}`
@@ -32,7 +34,9 @@ class EventService {
 
   static async getPubs(): Promise<AxiosResponse> {
     try {
-      const response: AxiosResponse = await axios.get(`${this.baseURL}/api/pubs`);
+      const response: AxiosResponse = await axios.get(
+        `${this.baseURL}/api/pubs`
+      );
       return response;
     } catch (error) {
       return this.handleError(error);
@@ -71,7 +75,29 @@ class EventService {
     }
   }
 
-  
+  // Method to get event types along with the first event
+  static async getEventTypesWithFirstEvents(): Promise<AxiosResponse> {
+    try {
+      const response = await axios.get(
+        `${this.baseURL}/api/eventTypeWithBaseEvent`
+      );
+      return response;
+    } catch (error: any) {
+      console.error("Error: ", error?.response?.data);
+      return error.response;
+    }
+  }
+
+  // Method to get event types along with the first event
+  static async getAllEvents(): Promise<AxiosResponse> {
+    try {
+      const response: AxiosResponse = await axios.get(`${this.baseURL}/api/events`);
+      return response;
+    } catch (error: any) {
+      console.error('Error ----', error.response?.data);
+      throw error.response;
+    }
+  }
 }
 
 export default EventService;

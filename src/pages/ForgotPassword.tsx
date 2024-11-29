@@ -114,10 +114,10 @@ export default function ForgotPassword() {
                   Numéro de téléphone
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  {/* <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Phone className="h-4 w-4 text-gray-400" />
                     <span className="ml-2 text-gray-500">+225</span>
-                  </div>
+                  </div> */}
                   <input
                     type="tel"
                     id="phone"

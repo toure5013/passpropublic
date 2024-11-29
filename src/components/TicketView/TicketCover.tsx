@@ -12,7 +12,7 @@ export default function TicketCover({ imageUrl, title }: TicketCoverProps) {
         src={imageUrl}
         alt={title}
         className="w-full h-full object-cover"
-        crossOrigin="anonymous"
+        crossOrigin="anonymous" 
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
       <h1 className="absolute bottom-3 left-3 right-3 text-white text-lg sm:text-xl font-bold">

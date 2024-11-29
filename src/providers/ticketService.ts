@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
-import { configService } from './config';
+import { configService } from './configService';
 
 
 // Define the TicketService class
@@ -8,7 +8,7 @@ class TicketService {
   private static readonly baseURL = configService.apiBaseUrl;
 
   // Method to get ticket information
-  static async getTicketIfnos(data: Record<string, any>): Promise<AxiosResponse> {
+  static async getTicketInfos(data: Record<string, any>): Promise<AxiosResponse> {
     try {
       const response = await axios.post(`${this.baseURL}/api/tickets/passOrder`, data);
       return response;
@@ -63,22 +63,11 @@ class TicketService {
   }
 
   // Method to get a user's tickets based on event type ID
-  static async getMyTickets(event_type_id: number, userUuid: string): Promise<AxiosResponse> {
+  static async getMyTickets(userUuid: string,event_type_id?: number, ): Promise<AxiosResponse> {
     try {
       const response = await axios.get(
         `${this.baseURL}/api/users/${userUuid}/tickets?event_type_id=${event_type_id}`
       );
-      return response;
-    } catch (error: any) {
-      console.error("Error: ", error?.response?.data);
-      return error.response;
-    }
-  }
-
-  // Method to get event types along with the first event
-  static async getEventTypesWithFirstEvents(): Promise<AxiosResponse> {
-    try {
-      const response = await axios.get(`${this.baseURL}/api/eventTypeWithBaseEvent`);
       return response;
     } catch (error: any) {
       console.error("Error: ", error?.response?.data);

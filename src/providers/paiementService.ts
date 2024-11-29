@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { configService } from "./config";
+import { configService } from "./configService";
 
 class PaiementService {
   private static readonly baseURL = configService.apiBaseUrl; // Remplacez par votre URL

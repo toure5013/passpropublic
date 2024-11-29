@@ -1,59 +1,97 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
-import BackButton from '../components/BackButton';
-import EventCard from '../components/PromoterDashboard/EventCard';
-import DashboardMenu from '../components/PromoterDashboard/DashboardMenu';
-import SalesStats from '../components/PromoterDashboard/SalesStats';
-import CategorySales from '../components/PromoterDashboard/CategorySales';
-import SellerDetails from '../components/PromoterDashboard/SellerDetails';
-import SalesHistory from '../components/PromoterDashboard/SalesHistory';
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { ArrowRight, Loader } from "lucide-react";
+import BackButton from "../components/BackButton";
+import EventCardPromoter from "../components/PromoterDashboard/EventCardPromoter";
+import DashboardMenu from "../components/PromoterDashboard/DashboardMenu";
+import SalesStats from "../components/PromoterDashboard/SalesStats";
+import CategorySales from "../components/PromoterDashboard/CategorySales";
+import SellerDetails from "../components/PromoterDashboard/SellerDetails";
+import SalesHistory from "../components/PromoterDashboard/SalesHistory";
+import { useEventStore } from "../store/eventStore";
+import EventService from "../providers/eventService";
+import { MyCustomEvent } from "../utils/eventtypes";
+import PromoterEventService from "../providers/promoters/promotereventService";
+import { PromoterStatsType } from "../utils/promotertypes";
+import useAuthStore from "../store/loginStore";
+import { useNavigate } from "react-router-dom";
 
 // Mock data
-const mockEvents = [
-  {
-    id: '1',
-    title: 'DJ Arafat en concert',
-    date: '31 Juillet 2024',
-    location: 'Palais de la culture d\'Abidjan',
-    image: 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14',
-    totalTickets: 1000,
-    soldTickets: 450,
-    sellers: [
-      { sold: 150 },
-      { sold: 200 },
-      { sold: 100 }
-    ]
-  },
-  {
-    id: '2',
-    title: 'Festival des Musiques Urbaines',
-    date: '15 - 16 Août 2024',
-    location: 'Stade FHB, Abidjan',
-    image: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3',
-    totalTickets: 2000,
-    soldTickets: 1200,
-    sellers: [
-      { sold: 400 },
-      { sold: 500 },
-      { sold: 300 }
-    ]
-  }
-];
 
 export default function PromoterDashboard() {
-  const [selectedEvent, setSelectedEvent] = useState<typeof mockEvents[0] | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<PromoterStatsType>(
+    {} as PromoterStatsType
+  );
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showAddSellerForm, setShowAddSellerForm] = useState(false);
-  const [newSeller, setNewSeller] = useState({ name: '', quota: '' });
+  const [newSeller, setNewSeller] = useState({ name: "", quota: "" });
+  const [eventTypes, setEventTypes] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [eventStats, setEventStats] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
+  const { updateEvent } = useEventStore();
+  const navigate = useNavigate();
 
-  const handleEventSelect = (event: typeof mockEvents[0]) => {
+  const { login, updateUserInfo, logout, userInfo, isLoggedIn } =
+  useAuthStore();
+  
+  const getEventsStats = async () => {
+    setIsLoading(true); // Show loading state
+
+    const userUuid = userInfo.user_uuid || localStorage.getItem("user_uuid");
+    try {
+      const response = await PromoterEventService.getStatEvents(userUuid);
+
+      if (response.status === 200) {
+        const data = response.data.data;
+
+        if (data) {
+          localStorage.setItem(
+            "eventStats",
+            JSON.stringify(response.data.data || [])
+          );
+          setEventStats(response.data.data || []);
+        }
+      } else {
+        setError("Failed to load event types");
+      }
+    } catch (error) {
+      setError("An error occurred while fetching event types");
+      console.error(error);
+    } finally {
+      setIsLoading(false); // Hide loading state
+    }
+  };
+
+  const getAllEventsAsync = async () => {
+    setIsLoading(true); // Show loading state
+
+    try {
+      const response = await EventService.getAllEvents();
+
+      if (response.status === 200) {
+        localStorage.setItem("allEvents", JSON.stringify(response.data || []));
+        updateEvent(response.data || []);
+        setEvents(response.data || []);
+      } else {
+        setError("Failed to load event types");
+      }
+    } catch (error) {
+      setError("An error occurred while fetching event types");
+      console.error(error);
+    } finally {
+      setIsLoading(false); // Hide loading state
+    }
+  };
+
+  const handleEventSelect = (event: PromoterStatsType) => {
     setSelectedEvent(event);
     setSelectedOption(null);
   };
 
   const handleBackToEvents = () => {
-    setSelectedEvent(null);
+    setSelectedEvent({} as PromoterStatsType);
     setSelectedOption(null);
   };
 
@@ -67,22 +105,22 @@ export default function PromoterDashboard() {
 
   const handleCancelAddSeller = () => {
     setShowAddSellerForm(false);
-    setNewSeller({ name: '', quota: '' });
+    setNewSeller({ name: "", quota: "" });
   };
 
   const handleSubmitAddSeller = () => {
     // Logique d'ajout du vendeur
-    console.log('Nouveau vendeur:', newSeller);
+    console.log("Nouveau vendeur:", newSeller);
     setShowAddSellerForm(false);
-    setNewSeller({ name: '', quota: '' });
+    setNewSeller({ name: "", quota: "" });
   };
 
-  const handleNewSellerChange = (field: 'name' | 'quota', value: string) => {
+  const handleNewSellerChange = (field: "name" | "quota", value: string) => {
     setNewSeller({ ...newSeller, [field]: value });
   };
 
   const renderEventList = () => (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="space-y-6"
@@ -101,9 +139,9 @@ export default function PromoterDashboard() {
       </div>
 
       <div className="space-y-4">
-        {mockEvents.map((event) => (
-          <EventCard
-            key={event.id}
+        {eventStats.map((event, index) => (
+          <EventCardPromoter
+            key={event.id + "index" + index}
             event={event}
             onClick={() => handleEventSelect(event)}
           />
@@ -116,51 +154,46 @@ export default function PromoterDashboard() {
     if (!selectedEvent) return null;
 
     const mockCategories = {
-      'Standard': { sold: 300, price: 5000 },
-      'VIP': { sold: 100, price: 15000 },
-      'Premium': { sold: 50, price: 25000 }
+      Standard: { sold: 300, price: 5000 },
+      VIP: { sold: 100, price: 15000 },
+      Premium: { sold: 50, price: 25000 },
     };
 
     const mockSellers = [
-      { id: '1', name: 'John Doe', quota: 200, sold: 150 },
-      { id: '2', name: 'Jane Smith', quota: 300, sold: 200 },
-      { id: '3', name: 'Bob Johnson', quota: 150, sold: 100 }
+      { id: "1", name: "John Doe", quota: 200, sold: 150 },
+      { id: "2", name: "Jane Smith", quota: 300, sold: 200 },
+      { id: "3", name: "Bob Johnson", quota: 150, sold: 100 },
     ];
 
     const mockSales = [
       {
-        id: '1',
-        date: '2024-01-15',
-        seller: 'John Doe',
-        category: 'Standard',
+        id: "1",
+        date: "2024-01-15",
+        seller: "John Doe",
+        category: "Standard",
         quantity: 2,
         unitPrice: 5000,
-        total: 10000
-      }
+        total: 10000,
+      },
     ];
 
-    if (selectedOption === 'stats') {
+    if (selectedOption === "stats") {
       return (
         <div className="space-y-6">
           <SalesStats
             entrances={350}
-            totalSold={selectedEvent.soldTickets}
+            totalSold={selectedEvent.total_amount}
             totalRevenue={7500000}
           />
-          <CategorySales
-            categories={mockCategories}
+          {/* <CategorySales
+            categories={selectedEvent.ticket_price_info}
             totalTickets={selectedEvent.totalTickets}
-          />
-          <SalesHistory
-            sales={mockSales}
-            categories={mockCategories}
-            sellers={mockSellers}
-          />
+          /> */}
         </div>
       );
     }
 
-    if (selectedOption === 'sellers') {
+    if (selectedOption === "sellers") {
       return (
         <SellerDetails
           sellers={mockSellers}
@@ -174,7 +207,7 @@ export default function PromoterDashboard() {
       );
     }
 
-    if (selectedOption === 'sales') {
+    if (selectedOption === "sales") {
       return (
         <SalesHistory
           sales={mockSales}
@@ -187,39 +220,68 @@ export default function PromoterDashboard() {
     return (
       <DashboardMenu
         onSelect={handleOptionSelect}
-        selectedOption={selectedOption || ''}
+        selectedOption={selectedOption || ""}
       />
     );
   };
 
+  useEffect(() => {
+    if(!isLoggedIn){
+      navigate("/home")
+    }else {
+      getEventsStats();
+    }
+  }, []);
+
   return (
-    <div className="pt-4 sm:pt-6 pb-6">
-      {selectedEvent && (
-        <BackButton onClick={handleBackToEvents} />
-      )}
-      
-      <div className="max-w-lg mx-auto px-3 sm:px-4">
-        {selectedEvent ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-6"
-          >
-            <div className="bg-white rounded-lg shadow-sm p-4">
-              <h1 className="text-xl font-bold text-gray-900 mb-2">
-                {selectedEvent.title}
+    <>
+      {isLoading ? (
+        <div className="flex justify-center items-center h-screen">
+          <div className="max-w-lg mx-auto px-3 sm:px-4">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 text-center">
+              <h1 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3">
+                Chargement des stats
               </h1>
-              <p className="text-sm text-gray-600">
-                {selectedEvent.date} • {selectedEvent.location}
+              <div className="w-full flex items-center justify-center">
+                <Loader color="#FF8A00" />
+              </div>
+              <p className="text-gray-600 text-xs sm:text-sm mb-4">
+                Veuillez patienter...
               </p>
             </div>
-
-            {renderEventContent()}
-          </motion.div>
-        ) : (
-          renderEventList()
-        )}
-      </div>
-    </div>
+          </div>
+        </div>
+      ) : (
+        <div className="pt-4 sm:pt-6 pb-6">
+          <div className="max-w-lg mx-auto px-3 sm:px-4">
+            {selectedEvent && selectedEvent.event ? (
+              <div>
+                {selectedEvent && <BackButton onClick={handleBackToEvents} />}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-6"
+                >
+                  <div className="bg-white rounded-lg shadow-sm p-4">
+                    <h1 className="text-xl font-bold text-gray-900 mb-2">
+                      {selectedEvent.event.event_name +
+                        "--------" +
+                        selectedEvent.event.id}
+                    </h1>
+                    <p className="text-sm text-gray-600">
+                      {selectedEvent.event.event_date} •{" "}
+                      {selectedEvent.event.event_localization}
+                    </p>
+                  </div>
+                  {renderEventContent()}
+                </motion.div>
+              </div>
+            ) : (
+              renderEventList()
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 }

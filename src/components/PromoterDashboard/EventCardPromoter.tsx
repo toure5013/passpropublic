@@ -1,22 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, Timer, TrendingUp, Users } from 'lucide-react';
+import { PromoterStatsType } from '../../utils/promotertypes';
 
 interface EventCardProps {
-  event: {
-    id: string;
-    title: string;
-    date: string;
-    location: string;
-    totalTickets: number;
-    soldTickets: number;
-    sellers: Array<{ sold: number }>;
-  };
+  event: PromoterStatsType;
   onClick: () => void;
 }
 
-export default function EventCard({ event, onClick }: EventCardProps) {
-  const salesPercentage = Math.round((event.soldTickets / event.totalTickets) * 100);
+export default function EventCardPromoter({ event, onClick }: EventCardProps) {
+  const totalTickets = event.ticket_goal;
+  const soldTickets = event.ticket_sold;
+  const salesPercentage = totalTickets > 0 ? Math.round((soldTickets / totalTickets) * 100) : 0;
 
   return (
     <motion.button
@@ -29,16 +24,16 @@ export default function EventCard({ event, onClick }: EventCardProps) {
         <div className="flex justify-between items-start mb-3">
           <div>
             <h2 className="text-base font-semibold text-gray-900 mb-1">
-              {event.title}
+              {event.event.event_name + "--------" + event.event.id}
             </h2>
             <div className="space-y-1">
               <div className="flex items-center gap-1.5 text-gray-600">
                 <Calendar className="h-3.5 w-3.5" />
-                <span className="text-xs">{event.date}</span>
+                <span className="text-xs">{event.event.event_date}</span>
               </div>
               <div className="flex items-center gap-1.5 text-gray-600">
                 <MapPin className="h-3.5 w-3.5" />
-                <span className="text-xs">{event.location}</span>
+                <span className="text-xs">{event.event.event_localization}</span>
               </div>
             </div>
           </div>
@@ -58,12 +53,12 @@ export default function EventCard({ event, onClick }: EventCardProps) {
               <Timer className="h-3.5 w-3.5" />
               <span className="text-xs font-medium">Entrées</span>
             </div>
-            <motion.p 
+            <motion.p
               className="text-lg font-bold"
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
             >
-              {Math.floor(event.soldTickets * 0.7)}
+              {Math.floor(soldTickets * 0.7)} {/* Assuming a 70% entry rate */}
             </motion.p>
           </div>
 
@@ -73,7 +68,7 @@ export default function EventCard({ event, onClick }: EventCardProps) {
               <TrendingUp className="h-3.5 w-3.5" />
               <span className="text-xs font-medium">Ventes</span>
             </div>
-            <p className="text-lg font-bold">{event.soldTickets}</p>
+            <p className="text-lg font-bold">{soldTickets}</p>
           </div>
 
           {/* Vendeurs */}
@@ -82,7 +77,8 @@ export default function EventCard({ event, onClick }: EventCardProps) {
               <Users className="h-3.5 w-3.5" />
               <span className="text-xs font-medium">Vendeurs</span>
             </div>
-            <p className="text-lg font-bold">{event.sellers.length}</p>
+            {/* Display sellers count if available in event.details */}
+            <p className="text-lg font-bold">{event.details?.length || 0}</p>
           </div>
         </div>
 
@@ -101,8 +97,8 @@ export default function EventCard({ event, onClick }: EventCardProps) {
             />
           </div>
           <div className="flex justify-between text-[10px] text-gray-500 mt-1">
-            <span>{event.soldTickets} vendus</span>
-            <span>{event.totalTickets} total</span>
+            <span>{soldTickets} vendus</span>
+            <span>{totalTickets} total</span>
           </div>
         </div>
       </div>

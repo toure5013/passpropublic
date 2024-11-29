@@ -5,62 +5,48 @@ import { motion } from 'framer-motion';
 import { useWishlistStore } from '../store/wishlistStore';
 import { useSessionStore } from '../store/sessionStore';
 import ImageLoader from './ImageLoader';
-import { configService } from '../providers/config';
+import { configService } from '../providers/configService';
 import { useEventStore } from '../store/eventStore';
+import { MyCustomEvent } from '../utils/eventtypes';
 
-interface EventCardProps {
-  id: string;
-  title: string;
-  date: string;
-  location: string;
-  event_ticket_img : string,
-  price: string;
-  className?: string;
-  availableTickets?: number;
-  totalTickets?: number;
-}
 
-export default function EventCard({ 
-  id, title, date, location, event_ticket_img, price, className = '',
-  availableTickets = 100, totalTickets = 100
-}: EventCardProps) {
+export default function EventCard(event: MyCustomEvent) {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore();
   const { addViewedEvent } = useSessionStore();
-  const isWishlisted = isInWishlist(id);
+  const isWishlisted = isInWishlist(event.id);
   const { currentEvent } = useEventStore();
   const navigate = useNavigate();
   
-  let image = configService.baseUrlImage + event_ticket_img
+  let image = configService.baseUrlImage + event.event_ticket_img
 
-  console.log(image)
+  // console.log(image)
 
   const handleWishlistClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
     if (isWishlisted) {
-      removeFromWishlist(id);
+      removeFromWishlist(event.id);
     } else {
-      addToWishlist({ id, title, date, location, image, price });
+      addToWishlist({ id:event.id, title:event.event_name, date:event.event_date, location:event.event_localization, image, price : event.ticket_prices[0].price });
     }
   };
 
   const handleCardClick = () => {
-    addViewedEvent(id);
-    navigate(`/event/${id}/booking`);
+    addViewedEvent(event.id);
+    navigate(`/event/${event.id}/booking`);
   };
 
   const getAvailabilityStatus = () => {
-    const remaining = availableTickets;
-    const percentage = (remaining / totalTickets) * 100;
-
-    if (percentage <= 5) {
+    const remaining = event.event_room_capacity
+    
+    if (event.status && false) {
       return {
         text: `Derniers billets ! Plus que ${remaining} places`,
         color: 'text-red-500',
         bgColor: 'bg-red-50'
       };
-    } else if (percentage <= 20) {
+    } else if(false)  {
       return {
         text: `${remaining} places disponibles`,
         color: 'text-orange-500',
@@ -84,12 +70,12 @@ export default function EventCard({
       <div 
         // to={`/event/${id}/booking`}
         onClick={(e) => handleCardClick()}
-        className={`block bg-white rounded-lg shadow-sm overflow-hidden transition-all hover:shadow-md ${className}`}
+        className={`block bg-white rounded-lg shadow-sm overflow-hidden transition-all hover:shadow-md `}
       >
         <div className="relative">
           <ImageLoader 
-            src={image} 
-            alt={title} 
+            src={configService.baseUrlImage + event.event_ticket_img} 
+            alt={event.event_name} 
             className="w-full aspect-[4/3] object-cover"
           />
           <motion.button 
@@ -122,24 +108,24 @@ export default function EventCard({
         
         <div className="p-2 sm:p-3">
           <h3 className="text-xs sm:text-sm font-semibold text-gray-900 line-clamp-1 mb-1">
-            {title}
+            {event.event_name}
           </h3>
           
           <div className="space-y-0.5 sm:space-y-1 mb-1.5 sm:mb-2">
             <div className="flex items-center text-gray-600">
               <Calendar className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1 flex-shrink-0" />
-              <span className="text-[10px] sm:text-xs truncate">{date}</span>
+              <span className="text-[10px] sm:text-xs truncate">{event.event_date} à {event.event_hour}</span>
             </div>
             <div className="flex items-center text-gray-600">
               <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1 flex-shrink-0" />
-              <span className="text-[10px] sm:text-xs truncate">{location}</span>
+              <span className="text-[10px] sm:text-xs truncate">{event.event_localization}</span>
             </div>
           </div>
           
           <div className="flex items-center justify-between">
-            <span className="text-xs sm:text-sm font-bold text-brand-red">{price}</span>
+            <span className="text-xs sm:text-sm font-bold text-brand-red">{event.ticket_prices[0].price} FCFA</span>
             <motion.button 
-              className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-brand-button rounded-brand text-[10px] sm:text-xs font-medium text-white hover:opacity-90 transition-opacity"
+              className="text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 bg-brand-button rounded-brand text-[10px] sm:text-xs font-medium text-white hover:opacity-90 transition-opacity"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >

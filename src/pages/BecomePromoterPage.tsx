@@ -11,7 +11,7 @@ interface TicketCategory {
   quantity: string;
 }
 
-export default function PromoterPage() {
+export default function BecomePromoterPage() {
   const [categories, setCategories] = useState<TicketCategory[]>([
     { id: '1', name: '', price: '', description: '', quantity: '' }
   ]);
