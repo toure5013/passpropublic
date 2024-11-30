@@ -152,14 +152,10 @@ export default function PromoterDashboard() {
       return (
         <div className="space-y-6">
           <SalesStats
-            entrances={350}
+            entrances={selectedEvent.ticket_sold}
             totalSold={selectedEvent.total_amount}
-            totalRevenue={7500000}
+            totalRevenue={selectedEvent.total_amount}
           />
-          {/* <CategorySales
-            categories={selectedEvent.ticket_price_info}
-            totalTickets={selectedEvent.totalTickets}
-          /> */}
         </div>
       );
     }
