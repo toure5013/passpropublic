@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Loader } from "lucide-react";
 import BackButton from "../components/BackButton";
@@ -7,15 +7,12 @@ import DashboardMenu from "../components/PromoterDashboard/DashboardMenu";
 import SalesStats from "../components/PromoterDashboard/SalesStats";
 import SellerDetails from "../components/PromoterDashboard/SellerDetails";
 import SalesHistory from "../components/PromoterDashboard/SalesHistory";
-import { useEventStore } from "../store/eventStore";
-import EventService from "../providers/eventService";
 import { PromoterStatsType } from "../utils/promotertypes";
 import useAuthStore from "../store/loginStore";
 import { useNavigate } from "react-router-dom";
 import PromoterEventService from "../providers/promoters/promoterEventService";
 import { toast } from "react-toastify";
 
-// Mock data
 
 export default function PromoterDashboard() {
   const [selectedEvent, setSelectedEvent] = useState<PromoterStatsType>(
@@ -24,13 +21,11 @@ export default function PromoterDashboard() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showAddSellerForm, setShowAddSellerForm] = useState(false);
   const [newSeller, setNewSeller] = useState({ name: "", quota: "" });
-  const [events, setEvents] = useState<any[]>([]);
   const [eventStats, setEventStats] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { updateEvent } = useEventStore();
   const navigate = useNavigate();
 
-  const { login, updateUserInfo, logout, userInfo, isLoggedIn } =
+  const {  userInfo, isLoggedIn } =
   useAuthStore();
   
   const getEventsStats = async () => {
@@ -50,27 +45,6 @@ export default function PromoterDashboard() {
           );
           setEventStats(response.data.data || []);
         }
-      } else {
-        toast.error("Failed to load event types");
-      }
-    } catch (error) {
-      toast.error("An error occurred while fetching event types");
-      console.error(error);
-    } finally {
-      setIsLoading(false); // Hide loading state
-    }
-  };
-
-  const getAllEventsAsync = async () => {
-    setIsLoading(true); // Show loading state
-
-    try {
-      const response = await EventService.getAllEvents();
-
-      if (response.status === 200) {
-        localStorage.setItem("allEvents", JSON.stringify(response.data || []));
-        updateEvent(response.data || []);
-        setEvents(response.data || []);
       } else {
         toast.error("Failed to load event types");
       }

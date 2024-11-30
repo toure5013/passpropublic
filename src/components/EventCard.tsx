@@ -1,12 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Heart, MapPin, Calendar, AlertCircle } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import {  useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useWishlistStore } from '../store/wishlistStore';
 import { useSessionStore } from '../store/sessionStore';
 import ImageLoader from './ImageLoader';
 import { configService } from '../providers/configService';
-import { useEventStore } from '../store/eventStore';
 import { MyCustomEvent } from '../utils/eventtypes';
 
 
@@ -14,7 +13,6 @@ export default function EventCard(event: MyCustomEvent) {
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore();
   const { addViewedEvent } = useSessionStore();
   const isWishlisted = isInWishlist(event.id);
-  const { currentEvent } = useEventStore();
   const navigate = useNavigate();
   
   let image = configService.baseUrlImage + event.event_ticket_img
@@ -32,7 +30,8 @@ export default function EventCard(event: MyCustomEvent) {
     }
   };
 
-  const handleCardClick = () => {
+  const handleCardClick = (e:any) => {
+    e.preventDefault();
     addViewedEvent(event.id);
     navigate(`/event/${event.id}/booking`);
   };
@@ -69,7 +68,7 @@ export default function EventCard(event: MyCustomEvent) {
     >
       <div 
         // to={`/event/${id}/booking`}
-        onClick={(e) => handleCardClick()}
+        onClick={(e) => handleCardClick(e)}
         className={`block bg-white rounded-lg shadow-sm overflow-hidden transition-all hover:shadow-md `}
       >
         <div className="relative">

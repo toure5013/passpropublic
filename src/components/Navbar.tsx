@@ -1,6 +1,5 @@
-import React from "react";
 import { Link } from "react-router-dom";
-import { DoorClosed, LockKeyhole, LogIn, LogOut } from "lucide-react";
+import {  LockKeyhole, LogIn } from "lucide-react";
 import Logo from "./Logo";
 import useAuthStore from "../store/loginStore";
 

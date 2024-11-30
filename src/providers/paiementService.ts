@@ -6,21 +6,21 @@ class PaiementService {
  // Remplacez par votre URL
 
   // Méthode pour effectuer un cashout
-  static async cashout(
-    userUuid: string,
-    number: string,
-    platform: string,
-    amount: number
-  ): Promise<any> {
+  static async cashout({
+    user_uuid,
+    number_to_debit,
+    platform,
+    amount,
+  } : any ): Promise<any> {
     const formData = new FormData();
-    formData.append("user_uuid", userUuid);
-    formData.append("number_to_debit", number);
+    formData.append("user_uuid", user_uuid);
+    formData.append("number_to_debit", number_to_debit);
     formData.append("platform", platform);
     formData.append("amount", amount.toString());
 
     console.log({
-      user_uuid: userUuid,
-      number_to_debit: number,
+      user_uuid: user_uuid,
+      number_to_debit: number_to_debit,
       platform: platform,
       amount: amount,
     });
@@ -39,15 +39,15 @@ class PaiementService {
 
   // Méthode pour vérifier une transaction
   static async checkTransaction(
-    partnerTransactionId: string
+    externalTransactionId: string
   ): Promise<any> {
     console.log("Checking Transaction :::", {
-      partnerTransactionId: partnerTransactionId,
+      partnerTransactionId: externalTransactionId,
     });
 
     try {
       const response: AxiosResponse = await axios.get(
-        `${this.baseURL}/api/paiement/checkTransactionStatus/${partnerTransactionId}`
+        `${this.baseURL}/api/paiement/checkTransactionStatus/${externalTransactionId}`
       );
       console.log("Transaction Status Response :::", response.data);
       return response.data;

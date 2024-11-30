@@ -6,7 +6,6 @@ import {
   Lock,
   Eye,
   EyeOff,
-  Phone,
   Loader,
 } from "lucide-react";
 import useAuthStore from "../store/loginStore";
@@ -21,7 +20,7 @@ export default function Login() {
   const [userType, setUserType] = useState<UserType>("public");
   const [showPassword, setShowPassword] = useState(false);
   const [phone, setPhone] = useState("0777974514");
-  const [password, setPassword] = useState("azerty");
+  const [password, setPassword] = useState("123456");
   const { login, updateUserInfo, isLoggedIn, userInfo } = useAuthStore();
   const [isLoading, setIsLoading] = React.useState(false);
 

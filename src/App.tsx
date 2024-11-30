@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { useSessionStore } from './store/sessionStore';
@@ -28,6 +28,8 @@ import ForgotPassword from './pages/ForgotPassword';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import PaymentIframe from './components/Checkout/PaymentIframe';
+import PaymentStatus from './components/Checkout/PaymentStatus';
 
 function ScrollToTop() {
   const location = useLocation();
@@ -81,6 +83,8 @@ function AppContent() {
                 <Route path="/event/:id/booking" element={<EventBooking />} />
                 <Route path="/panier" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
+                <Route path="/paiement/init" element={<PaymentIframe />} />
+                <Route path="/paiement/status" element={<PaymentStatus />} />
                 <Route path="/paiement/succes" element={<PaymentSuccess />} />
                 <Route path="/paiement/erreur" element={<PaymentError />} />
                 <Route path="/wishlist" element={<Wishlist />} />
@@ -94,6 +98,7 @@ function AppContent() {
                 <Route path="/espace-promoteur" element={<PromoterDashboard />} />
                 <Route path="/connexion" element={<Login />} />
                 <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
+
                 <Route path="/*" element={<Home />} />
               </Routes>
             </PageTransition>
