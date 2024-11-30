@@ -15,8 +15,10 @@ interface CartStore {
   promoCode: string | null;
   promoDiscount: number;
   addToCart: (item: CartItem) => void;
+  addOneToCartMutiple: (item: CartItem) => void;
   removeFromCart: (eventId: number, ticketPriceId: number) => void;
   updateQuantity: (eventId: number, ticketPriceId: number, quantity: number) => void;
+  removeAllItems: () => void;
   clearCart: () => void;
   getTotal: () => number;
   getFinalTotal: () => number;
@@ -37,8 +39,10 @@ export const useCartStore = create<CartStore>()(
       promoCode: null,
       promoDiscount: 0,
       
-      addToCart: (item) => {
+      addToCart : (item) => {
         set((state) => {
+
+          
           const existingItem = state.items.find(
             i => i.eventId === item.eventId && i.ticketPriceId === item.ticketPriceId
           );
@@ -56,6 +60,12 @@ export const useCartStore = create<CartStore>()(
 
           return { ...state, items: [...state.items, item] };
         });
+      },
+ 
+      addOneToCartMutiple: (item) => {
+        set(() => ({
+          items: [item], // Replace the current cart with the new item
+        }));
       },
 
       removeFromCart: (eventId, ticketPriceId) => {
@@ -77,6 +87,8 @@ export const useCartStore = create<CartStore>()(
           )
         }));
       },
+
+      removeAllItems: () => set({ items: [] }),
 
       clearCart: () => set({ items: [], promoCode: null, promoDiscount: 0 }),
 

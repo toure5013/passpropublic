@@ -8,6 +8,7 @@ import { usePayementStore } from "../../store/payementStore";
 interface PaymentMethodProps {
   amount: number;
   userInfo: any;
+  payment_number: string;
 }
 
 interface PaymentOption {
@@ -53,11 +54,13 @@ const paymentOptions: PaymentOption[] = [
 export default function PaymentMethod({
   amount,
   userInfo,
+  payment_number
 }: PaymentMethodProps) {
   const navigate = useNavigate();
   const [selectedMethod, setSelectedMethod] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const {setTransaction} = usePayementStore();
+  const { setTransactionAllInfo } = usePayementStore();
 
   const handlePayment = async () => {
     if (!selectedMethod || isProcessing) return;
@@ -72,7 +75,7 @@ export default function PaymentMethod({
     try {
       const response = await PaiementService.cashout({
         user_uuid: userInfo.uuid,
-        number_to_debit: userInfo.tel,
+        number_to_debit: payment_number ? payment_number : userInfo.tel,
         platform: selectedMethod,
         amount: amount,
       });
@@ -89,17 +92,25 @@ export default function PaymentMethod({
         const externalTransactionId = response.data.data.externalTransactionId;
   
         // Save payment data to the store
+        
+
+        await sessionStorage.setItem("externalTransactionId", externalTransactionId);
+        await sessionStorage.setItem("deepLinkUrl", deepLinkUrl);
+        await sessionStorage.setItem("amount", amount.toString());
+        await sessionStorage.setItem("transactionallinfo", JSON.stringify(response.data.data));
+
+
         setTransaction({
           externalTransactionId,
           deepLinkUrl,
-          amount,  // Optional: save amount as well if needed
+          amount, 
         });
 
-  
+        await setTransactionAllInfo(response.data.data);
         setIsProcessing(false);
   
         // Encode the deepLinkUrl and redirect
-        navigate("/paiement/status/");
+        navigate("/paiement/status");
       } else {
         setIsProcessing(false);
         toast.error(response.message);

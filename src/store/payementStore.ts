@@ -30,13 +30,13 @@ interface TransactionState {
 }
 
 export const usePayementStore = create<TransactionState>((set) => ({
-  transactionId: null,
-  externalTransactionId: null,
+  transactionId: sessionStorage.getItem('transactionId') || null,
+  externalTransactionId: sessionStorage.getItem('externalTransactionId') || null,
   status: null,
-  amount: null,
+  amount: sessionStorage.getItem('amount') ? JSON.parse(sessionStorage.getItem('amount') as string) : null,
   currency: null,
-  deepLinkUrl: null,
-  transactionAllInfo: null,
+  deepLinkUrl: sessionStorage.getItem('deepLinkUrl') || null,
+  transactionAllInfo: sessionStorage.getItem('transactionAllInfo') ? JSON.parse(sessionStorage.getItem('transactionAllInfo') as string) : null,
 
   // Set transaction state
   setTransaction: (data) =>
@@ -54,12 +54,12 @@ export const usePayementStore = create<TransactionState>((set) => ({
   // Reset transaction state
   resetTransaction: () =>
     set(() => ({
-      transactionId: null,
-      externalTransactionId: null,
+      transactionId: sessionStorage.getItem('transactionId') || null,
+      externalTransactionId: sessionStorage.getItem('externalTransactionId') || null,
       status: null,
       amount: null,
       currency: null,
-      deepLinkUrl: null,
+      deepLinkUrl: sessionStorage.getItem('deepLinkUrl') || null,
       transactionAllInfo: null,
     })),
 }));

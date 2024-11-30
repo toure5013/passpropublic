@@ -67,9 +67,7 @@ export default function Login() {
       // Store user data in localStorage
       localStorage.setItem("user_tel", userInfo.tel);
       localStorage.setItem("user_uuid", userInfo.uuid);
-      localStorage.setItem("user_name", userInfo.name);
-      localStorage.setItem("user_surname", userInfo.surname);
-      localStorage.setItem("user", JSON.stringify(userInfo));
+      localStorage.setItem("user_info", JSON.stringify(userInfo));
       localStorage.setItem("type", userInfo.type);
       localStorage.setItem("userType", userInfo.userType);
 
@@ -120,13 +118,11 @@ export default function Login() {
       userInfo.userType = "promoter";
 
       // Store user data in localStorage
-      localStorage.setItem("user_tel", userInfo.tel);
-      localStorage.setItem("user_uuid", userInfo.uuid);
-      localStorage.setItem("user_name", userInfo.name);
-      localStorage.setItem("user_surname", userInfo.surname);
-      localStorage.setItem("user", JSON.stringify(userInfo));
-      localStorage.setItem("type", userInfo.type);
-      localStorage.setItem("userType", userInfo.userType);
+       localStorage.setItem("user_tel", userInfo.tel);
+       localStorage.setItem("user_uuid", userInfo.uuid);
+       localStorage.setItem("user_info", JSON.stringify(userInfo));
+       localStorage.setItem("type", userInfo.type);
+       localStorage.setItem("userType", userInfo.userType);
 
       updateUserInfo(userInfo);
       login();

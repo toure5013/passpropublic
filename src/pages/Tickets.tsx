@@ -4,11 +4,15 @@ import { Link } from "react-router-dom";
 import TicketService from "../providers/ticketService";
 import { MyCustomTicket } from "../utils/tickettypes";
 import { useTicketStore } from "../store/ticketStore";
+import useAuthStore from "../store/loginStore";
 
 export default function Tickets() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { isLoggedIn } = useAuthStore();
+
+
   //useTicketStore
-  const { updateAllTickets} = useTicketStore()
+  const { updateAllTickets,} = useTicketStore()
 
   const [tickets, setTickets] = React.useState<MyCustomTicket[]>(
     [] as MyCustomTicket[]
@@ -41,6 +45,8 @@ export default function Tickets() {
 
  
   useEffect(() => {
+    // if(isLoggedIn){
+    // }
     getMyTicketsAsync();
   }, []);
 

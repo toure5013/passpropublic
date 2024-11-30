@@ -7,7 +7,7 @@ interface PersonalInfoProps {
   initialValues: {
     name: string;
     surname: string;
-    phone: string;
+    tel: string;
   };
   isLoading?: boolean;
   onSubmit: (data: PersonalInfoProps["initialValues"]) => void;
@@ -18,6 +18,7 @@ export default function PersonalInfo({
   onSubmit,
   isLoading
 }: PersonalInfoProps) {
+  
   const {
     register,
     handleSubmit,
@@ -60,6 +61,7 @@ export default function PersonalInfo({
         <input
           type="text"
           id="name"
+          value={initialValues.name}
           className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red"
           {...register("name", { required: "Le prénom est requis" })}
         />
@@ -80,6 +82,7 @@ export default function PersonalInfo({
         <input
           type="text"
           id="surname"
+          value={initialValues.surname}
           className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red"
           {...register("surname", { required: "Le nom est requis" })}
         />
@@ -98,10 +101,10 @@ export default function PersonalInfo({
         <input
           type="tel"
           id="phone"
-          maxLength={10}
+           maxLength={10}
           minLength={10}
           className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red"
-          {...register("phone", {
+          {...register("tel", {
             required: "Le numéro de téléphone est requis",
             pattern: {
               value: /^[0-9]{10}$/,
@@ -109,8 +112,8 @@ export default function PersonalInfo({
             },
           })}
         />
-        {errors.phone && (
-          <p className="mt-1 text-xs text-red-500">{errors.phone.message}</p>
+        {errors.tel && (
+          <p className="mt-1 text-xs text-red-500">{errors.tel.message}</p>
         )}
       </div>
 
