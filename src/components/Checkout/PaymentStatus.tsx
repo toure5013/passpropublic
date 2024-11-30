@@ -7,8 +7,9 @@ import { Loader } from "lucide-react";
 export default function PaymentStatus() {
   const navigate = useNavigate();
 
-  const { externalTransactionId, deepLinkUrl } = usePayementStore();
+  const { externalTransactionId, _be_removed_deepLinkUrl_, plateform } = usePayementStore();
   const [isProcessing, setIsprocessing] = useState(false);
+  const [instructions, setInstructions] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [attemptCount, setAttemptCount] = useState(0); // Track the number of attempts
   const timerRef = useRef<NodeJS.Timeout | null>(null); // Use a ref to store the timer
@@ -62,16 +63,14 @@ export default function PaymentStatus() {
     }
   };
 
-  async function initPayement(deepLinkUrl: string) {
-    window.open(deepLinkUrl, "_blank");
+  async function payementCheckerTimer( seconds = 10000) {
     setIsprocessing(true);
-    
     // Initialize the timer
     if (attemptCount < 20) {
       timerRef.current = setTimeout(() => {
         setAttemptCount((prev) => prev + 1);
         payementStatusChecker();
-      }, 15000);
+      }, seconds);
     } else {
       setIsprocessing(false);
     }
@@ -93,18 +92,26 @@ export default function PaymentStatus() {
   };
 
   useEffect(() => {
+    if(plateform ==="mtn" || plateform ==="moov" ){
+      setInstructions("Une demande de débit de paiement a été envoyée à votre numéro de téléphone. Veuillez vérifier votre téléphone pour confirmer le paiement.");
+      payementCheckerTimer();
+    }else {
+      setInstructions("Veuillez cliquer sur le lien suivant afin de proceder au paiement.");
+    }
+
+
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       if (timerRef.current) clearTimeout(timerRef.current); // Clean up the timer
     };
-  }, []);
+  }, [plateform]);
 
 
   console.log("externalTransactionId");
   console.log(externalTransactionId);
   console.log("deepLinkUrl");
-  console.log(deepLinkUrl);
+  console.log(plateform);
   console.log("---------------------");
 
   if (isProcessing) {
@@ -112,10 +119,13 @@ export default function PaymentStatus() {
       <div className="w-full">
         <div className="w-full h-full relative flex items-center justify-center mt-4">
           <div className="flex flex-col items-center">
-            <h6 className="text-sm font-semibold text-gray-900 justify-content-center text-center">
+            <h6 className="text-lg font-semibold text-gray-900 justify-content-center text-center">
               En attente de <br /> confirmation de paiement
             </h6>
-            <Loader className="animate-spin" color="#FF0000" />
+            <Loader className="animate-spin my-10" color="#FF0000" />
+            <div className="max-w-lg text-center mx-10">
+              <p className="text-xs">{instructions}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -123,8 +133,8 @@ export default function PaymentStatus() {
   }
 
   return (
-    <>
-      {deepLinkUrl ? (
+    <> 
+      {_be_removed_deepLinkUrl_ ? (
         <div className="w-full">
           <div className="w-full h-full relative flex items-center justify-center mt-4">
             <div className="flex flex-col items-center">
@@ -134,7 +144,10 @@ export default function PaymentStatus() {
               </h6>
               <button
                 className="mt-3 flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end rounded-lg text-white text-sm font-medium hover:opacity-90 transition-opacity"
-                onClick={() => initPayement(deepLinkUrl)}
+                onClick={() => {
+                  window.open(_be_removed_deepLinkUrl_, "_blank");
+                  payementCheckerTimer()
+                }}
                 type="button"
               >
                 Confirmer le paiement
@@ -147,7 +160,7 @@ export default function PaymentStatus() {
           <div className="flex flex-col items-center mt-4">
             <Loader className="animate-spin" color="#FF0000" />
             <h6 className="text-sm text-center font-semibold mt-3 text-gray-900">
-              En attente du lien de paiement
+              {instructions}
             </h6>
           </div>
         </div>

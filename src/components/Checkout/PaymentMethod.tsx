@@ -54,23 +54,19 @@ const paymentOptions: PaymentOption[] = [
 export default function PaymentMethod({
   amount,
   userInfo,
-  payment_number
+  payment_number,
 }: PaymentMethodProps) {
   const navigate = useNavigate();
   const [selectedMethod, setSelectedMethod] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const {setTransaction} = usePayementStore();
+  const { setTransaction } = usePayementStore();
   const { setTransactionAllInfo } = usePayementStore();
 
   const handlePayment = async () => {
     if (!selectedMethod || isProcessing) return;
 
-    console.log(amount);
-    console.log(userInfo);
-
     setIsProcessing(true);
 
-    console.log("BLOC PAYMENT");
 
     try {
       const response = await PaiementService.cashout({
@@ -87,28 +83,48 @@ export default function PaymentMethod({
       }
 
       if (response.success) {
+        console.log(response.data.data._be_removed_deepLinkUrl_);
+        setIsProcessing(false);
+        
         // Get the URL and transaction data
         const deepLinkUrl = response.data.data.deepLinkUrl;
         const externalTransactionId = response.data.data.externalTransactionId;
-  
-        // Save payment data to the store
-        
+        const _be_removed_deepLinkUrl_ = response.data.data._be_removed_deepLinkUrl_ ? response.data.data._be_removed_deepLinkUrl_ : "";
+        const codeService = response.data.data.codeService;
+        const plateform = selectedMethod;
 
-        await sessionStorage.setItem("externalTransactionId", externalTransactionId);
+
+        //  Save data to session storage
+        await sessionStorage.setItem(
+          "externalTransactionId",
+          externalTransactionId,
+        );
         await sessionStorage.setItem("deepLinkUrl", deepLinkUrl);
         await sessionStorage.setItem("amount", amount.toString());
-        await sessionStorage.setItem("transactionallinfo", JSON.stringify(response.data.data));
+        await sessionStorage.setItem(
+          "transactionallinfo",
+          JSON.stringify(response.data.data)
+        );
+        await sessionStorage.setItem(
+          "_be_removed_deepLinkUrl_",
+          _be_removed_deepLinkUrl_
+        );
+        await sessionStorage.setItem("codeService", codeService);
+        await sessionStorage.setItem("plateform", plateform);
 
-
+        // Save payment data to the store
         setTransaction({
           externalTransactionId,
           deepLinkUrl,
-          amount, 
+          amount,
+          _be_removed_deepLinkUrl_,
+          codeService,
+          plateform,
         });
 
         await setTransactionAllInfo(response.data.data);
         setIsProcessing(false);
-  
+
         // Encode the deepLinkUrl and redirect
         navigate("/paiement/status");
       } else {
@@ -116,7 +132,7 @@ export default function PaymentMethod({
         toast.error(response.message);
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       setIsProcessing(false);
       toast.error("Une erreur s'est produite. Veuillez recommencer.");
       navigate("/paiement/erreur");

@@ -18,19 +18,13 @@ class PaiementService {
     formData.append("platform", platform);
     formData.append("amount", amount.toString());
 
-    console.log({
-      user_uuid: user_uuid,
-      number_to_debit: number_to_debit,
-      platform: platform,
-      amount: amount,
-    });
 
     try {
       const response: AxiosResponse = await axios.post(
         `${this.baseURL}/api/paiement/init`,
         formData
       );
-      console.log("Cashout Response :::", response.data);
+      // console.log("Cashout Response :::", response.data);
       return response.data;
     } catch (error) {
       return this.handleError(error);
@@ -41,9 +35,6 @@ class PaiementService {
   static async checkTransaction(
     externalTransactionId: string
   ): Promise<any> {
-    console.log("Checking Transaction :::", {
-      partnerTransactionId: externalTransactionId,
-    });
 
     try {
       const response: AxiosResponse = await axios.get(
