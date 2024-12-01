@@ -24,7 +24,7 @@ export default function EventCardPromoter({ event, onClick }: EventCardProps) {
         <div className="flex justify-between items-start mb-3">
           <div>
             <h2 className="text-base font-semibold text-gray-900 mb-1">
-              {event.event.event_name + "--------" + event.event.id}
+              {event.event.event_name }
             </h2>
             <div className="space-y-1">
               <div className="flex items-center gap-1.5 text-gray-600">

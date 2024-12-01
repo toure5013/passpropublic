@@ -31,7 +31,10 @@ export default function PromoterDashboard() {
   const getEventsStats = async () => {
     setIsLoading(true); // Show loading state
 
-    const userUuid = userInfo.uuid || localStorage.getItem("user_uuid");
+    console.log(userInfo);
+    
+
+    const userUuid = userInfo.uuid || userInfo.user_uuid || localStorage.getItem("user_uuid");
     try {
       const response = await PromoterEventService.getStatEvents(userUuid);
 
@@ -231,9 +234,7 @@ export default function PromoterDashboard() {
                 >
                   <div className="bg-white rounded-lg shadow-sm p-4">
                     <h1 className="text-xl font-bold text-gray-900 mb-2">
-                      {selectedEvent.event.event_name +
-                        "--------" +
-                        selectedEvent.event.id}
+                      {selectedEvent.event.event_name }
                     </h1>
                     <p className="text-sm text-gray-600">
                       {selectedEvent.event.event_date} •{" "}
