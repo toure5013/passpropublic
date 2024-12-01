@@ -7,12 +7,15 @@ import {
   Eye,
   EyeOff,
   Loader,
+  AlertCircle,
 } from "lucide-react";
 import useAuthStore from "../store/loginStore";
 import UserService from "../providers/userServices";
 import { Link, useNavigate } from "react-router-dom";
 import promoterUserService from "../providers/promoters/promoterUserService";
 import { toast } from "react-toastify";
+import PhoneInput from "../components/PhoneInput";
+import CodeInput from "../components/CodeInput";
 
 type UserType = "public" | "promoter";
 
@@ -23,6 +26,8 @@ export default function Login() {
   const [password, setPassword] = useState("123456");
   const { login, updateUserInfo, isLoggedIn, userInfo } = useAuthStore();
   const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = useState("");
+  const [code, setCode] = useState(["", "", "", "", "", ""]);
 
   const navigate = useNavigate();
 
@@ -35,30 +40,39 @@ export default function Login() {
     }
   }, [isLoggedIn]);
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, "");
-    if (value.length <= 10) {
-      setPhone(value);
+  const handleCodeChange = (index: number, value: string) => {
+    if (value.length > 1) return;
+    const newCode = [...code];
+    newCode[index] = value;
+    setCode(newCode);
+    setError("");
+
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`code-${index + 1}`);
+      nextInput?.focus();
     }
   };
 
-  const formatPhoneNumber = (value: string) => {
-    if (!value) return value;
-    if (value.length <= 2) return value;
-    if (value.length <= 5) return `${value.slice(0, 2)} ${value.slice(2)}`;
-    if (value.length <= 7)
-      return `${value.slice(0, 2)} ${value.slice(2, 5)} ${value.slice(5)}`;
-    return `${value.slice(0, 2)} ${value.slice(2, 5)} ${value.slice(
-      5,
-      7
-    )} ${value.slice(7)}`;
+  const handleCodeKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace" && !code[index] && index > 0) {
+      const prevInput = document.getElementById(`code-${index - 1}`);
+      prevInput?.focus();
+    }
   };
 
   const loginPublic = async () => {
+    const enteredCode = code.join('');
+    if (!enteredCode || enteredCode.length !== 6) {
+      setError('Veuillez entrer le code complet');
+      return;
+    }
+
     const response: any = await UserService.login({
       login: phone,
-      password,
+      password : enteredCode,
     });
+
+    console.log(phone, password, userType);
 
     if (response && response.user) {
       const userInfo = response.user;
@@ -87,13 +101,17 @@ export default function Login() {
         navigate("/home");
       }
     } else {
-      console.log("response")
-      console.log(response["message"])
+      console.log("response");
+      console.log(response["message"]);
       toast.error(response["message"]);
     }
   };
 
   const loginPromoter = async () => {
+    if (!password) {
+      setError("Veuillez entrer votre mot de passe");
+      return;
+    }
     const response: any = await promoterUserService.login({
       username: phone,
       password: password,
@@ -109,28 +127,27 @@ export default function Login() {
       }
       if (userInfo.status === -1) {
         toast.error(
-          "Vous n'avez pas encore d'accès. Veuillez contacter l'administrateur.")
+          "Vous n'avez pas encore d'accès. Veuillez contacter l'administrateur."
+        );
         return;
       }
-
-     
 
       userInfo.userType = "promoter";
 
       // Store user data in localStorage
-       localStorage.setItem("user_tel", userInfo.tel);
-       localStorage.setItem("user_uuid", userInfo.uuid);
-       localStorage.setItem("user_info", JSON.stringify(userInfo));
-       localStorage.setItem("type", userInfo.type);
-       localStorage.setItem("userType", userInfo.userType);
+      localStorage.setItem("user_tel", userInfo.tel);
+      localStorage.setItem("user_uuid", userInfo.uuid);
+      localStorage.setItem("user_info", JSON.stringify(userInfo));
+      localStorage.setItem("type", userInfo.type);
+      localStorage.setItem("userType", userInfo.userType);
 
       updateUserInfo(userInfo);
       login();
-    
+
       // Navigate based on user status
       navigate("/espace-promoteur");
     } else {
-      toast.error('Erreur de connexion. Veuillez réessayer.');
+      toast.error("Erreur de connexion. Veuillez réessayer.");
     }
   };
 
@@ -203,85 +220,100 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Numéro de téléphone
               </label>
-              <div className="relative">
-                {/* <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Phone className="h-4 w-4 text-gray-400" />
-                  <span className="ml-2 text-gray-500">+225</span>
-                </div> */}
-                <input
-                  type="tel"
-                  id="phone"
-                  value={formatPhoneNumber(phone)}
-                  onChange={handlePhoneChange}
-                  className="w-full pl-24 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red"
-                  placeholder="07 00 00 00 00"
-                  required
-                />
-              </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Format: 07 XX XX XX XX
-              </p>
+              <PhoneInput
+                value={phone}
+                onChange={(value) => {
+                  setPhone(value);
+                  setError("");
+                }}
+                error={error}
+                required
+              />
             </div>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Mot de passe
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-4 w-4 text-gray-400" />
+            {userType === "promoter" ? (
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Mot de passe
+                  </label>
+                  <Link
+                    to="/mot-de-passe-oublie"
+                    className="text-sm text-brand-red hover:text-brand-red/80"
+                  >
+                    Mot de passe oublié ?
+                  </Link>
                 </div>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setError("");
+                    }}
+                    className="w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red text-base"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 text-brand-red border-gray-300 rounded focus:ring-brand-red"
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Code à 6 chiffres
+                </label>
+                <CodeInput
+                  value={code}
+                  onChange={handleCodeChange}
+                  onKeyDown={handleCodeKeyDown}
+                  error={error}
                 />
-                <span className="ml-2 text-sm text-gray-600">
-                  Se souvenir de moi
-                </span>
-              </label>
-              <Link
-                to="/mot-de-passe-oublie"
-                className="text-sm text-brand-red hover:text-brand-red/80"
+              </div>
+            )}
+
+            {error && (
+              <motion.p
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-sm text-red-500 flex items-center gap-1"
               >
-                Mot de passe oublié ?
-              </Link>
-            </div>
+                <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
+                {error}
+              </motion.p>
+            )}
+
+            {userType === "promoter" && (
+              <div className="flex items-center">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 text-brand-red border-gray-300 rounded focus:ring-brand-red"
+                  />
+                  <span className="ml-2 text-sm text-gray-600">
+                    Se souvenir de moi
+                  </span>
+                </label>
+              </div>
+            )}
 
             {isLoading ? (
-              //CENTER ISLAODING
               <div className="w-full flex items-center justify-center">
                 <Loader color="#FF8A00" />
               </div>
@@ -297,22 +329,17 @@ export default function Login() {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Vous n'avez pas de compte ?{" "}
               {userType === "promoter" ? (
-                <a
-                  href="/devenir-promoteur"
-                  className="text-brand-red hover:text-brand-red/80 font-medium"
-                >
-                  Devenir promoteur
-                </a>
-              ) : (
-                <a
-                  href="/inscription"
-                  className="text-brand-red hover:text-brand-red/80 font-medium"
-                >
-                  S'inscrire
-                </a>
-              )}
+                <p>
+                  Vous n'avez pas de compte ?{" "}
+                  <Link
+                    to="/devenir-promoteur"
+                    className="text-brand-red hover:text-brand-red/80 font-medium"
+                  >
+                    Devenir promoteur
+                  </Link>
+                </p>
+              ) : null}
             </p>
           </div>
         </motion.div>

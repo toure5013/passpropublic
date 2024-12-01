@@ -26,7 +26,7 @@ export default function EventCard(event: MyCustomEvent) {
     if (isWishlisted) {
       removeFromWishlist(event.id);
     } else {
-      addToWishlist({ id:event.id, title:event.event_name, date:event.event_date, location:event.event_localization, image, price : event.ticket_prices[0].price });
+      addToWishlist(event);
     }
   };
 

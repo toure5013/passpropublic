@@ -74,6 +74,34 @@ class TicketService {
       return error.response;
     }
   }
+
+  static async generateTicket(
+    event_id: string,
+    tel: string,
+    event_ticket_price_id: string,
+    quantity: number,
+    user_uuid: string
+  ): Promise<AxiosResponse> {
+    try {
+      const payload = {
+        event_id,
+        user_uuid,
+        quantity,
+        tel,
+        event_ticket_price_id,
+      };
+
+      const response = await axios.post(
+        `${this.baseURL}/generate/ticket`,
+        payload
+      );
+
+      return response.data;
+    } catch (error: any) {
+      console.error("Error generating ticket:", error?.response?.data || error.message);
+      throw error.response || error; // Re-throw for the caller to handle
+    }
+  }
 }
 
 export default TicketService;

@@ -16,7 +16,6 @@ import {
 import { Link } from "react-router-dom";
 import EventCard from "../components/EventCard";
 import EventService from "../providers/eventService";
-import TicketService from "../providers/ticketService";
 import { useEventStore } from "../store/eventStore";
 
 // Fixed data

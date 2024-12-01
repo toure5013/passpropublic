@@ -1,11 +1,20 @@
-import { Link } from "react-router-dom";
-import {  LockKeyhole, LogIn } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ChevronDown, Heart, LogIn, LogOut, Ticket, User } from "lucide-react";
 import Logo from "./Logo";
 import useAuthStore from "../store/loginStore";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
 
 export default function Navbar() {
-  const {  logout, isLoggedIn } =
-    useAuthStore();
+  const { logout, isLoggedIn, userInfo } = useAuthStore();
+  const [showDropdown, setShowDropdown] = useState(false);
+  const navigate = useNavigate();
+  
+  
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -16,28 +25,80 @@ export default function Navbar() {
           </Link>
 
           {isLoggedIn ? (
-            <div className="flex items-center">
-              <button
-                className="flex items-center gap-2 px-3 py-1.5 bg-orange-700 rounded-lg text-white text-sm font-medium hover:opacity-90 transition-opacity"
-                onClick={()=>{
-                  logout();
-                  window.location.reload();
-                }}
-              >
-                <LockKeyhole className="h-5 w-5 mr-2" />
-                Deconnexion
-              </button>
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <motion.button
+                  onClick={() => setShowDropdown(!showDropdown)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end rounded-lg text-white text-sm font-medium hover:opacity-90 transition-opacity"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <User className="h-4 w-4" />
+                  <span>{userInfo.name}</span>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${
+                      showDropdown ? "rotate-180" : ""
+                    }`}
+                  />
+                </motion.button>
+
+                <AnimatePresence>
+                  {showDropdown && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 border"
+                    >
+                      {userInfo?.user_type === "promoter" && (
+                        <Link
+                          to="/espace-promoteur"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          onClick={() => setShowDropdown(false)}
+                        >
+                          <User className="h-4 w-4" />
+                          Espace promoteur
+                        </Link>
+                      )}
+                      <Link
+                        to="/tickets"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        <Ticket className="h-4 w-4" />
+                        Mes tickets
+                      </Link>
+                      <Link
+                        to="/wishlist"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        onClick={() => setShowDropdown(false)}
+                      >
+                        <Heart className="h-4 w-4" />
+                        Favoris
+                      </Link>
+                      <button
+                        onClick={() => {
+                          setShowDropdown(false);
+                          handleLogout();
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-50 w-full"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Déconnexion
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           ) : (
-            <div className="flex items-center">
-              <Link
-                to="/connexion"
-                className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end rounded-lg text-white text-sm font-medium hover:opacity-90 transition-opacity"
-              >
-                <LogIn className="h-4 w-4" />
-                <span> Connexion</span>
-              </Link>
-            </div>
+            <Link
+              to="/connexion"
+              className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end rounded-lg text-white text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              <LogIn className="h-4 w-4" />
+              <span>Connexion</span>
+            </Link>
           )}
         </div>
       </div>
