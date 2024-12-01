@@ -7,9 +7,9 @@ import { useTicketStore } from "../store/ticketStore";
 import useAuthStore from "../store/loginStore";
 
 export default function Tickets() {
+  
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { isLoggedIn, userInfo } = useAuthStore();
-
 
   //useTicketStore
   const { updateAllTickets,} = useTicketStore()
@@ -18,12 +18,12 @@ export default function Tickets() {
     [] as MyCustomTicket[]
   );
 
-  const getMyTicketsAsync = async (userUuid: string, eventTypeId?: number) => {
+  const getMyTicketsAsync = async ( eventTypeId?: number) => {
     setIsLoading(true);
 
     try {
       const response = await TicketService.getMyTickets(
-        `${userUuid}`,
+        `${userInfo.uuid}`,
         eventTypeId
       );
 

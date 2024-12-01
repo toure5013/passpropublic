@@ -188,7 +188,7 @@ export default function PaymentMethod({
   const isOtpComplete = code.every((digit) => digit !== "");
 
   // GENERATE USET TICKET
-  const generateTickets = async () => {
+  const buyTickets = async () => {
     for (let i = 0; i < items.length; i++) {
       console.log({
         event_id: items[i].eventId,
@@ -199,12 +199,27 @@ export default function PaymentMethod({
       });
 
       try {
-        const response: any = await TicketService.generateTicket({
-          event_id: items[i].eventId,
-          tel: ticketOwnerInfo.tel,
-          event_ticket_price_id: items[i].ticketPriceId,
-          quantity: items[i].quantity,
+        const response: any = await TicketService.buyTicket({
           user_uuid: userInfo.uuid,
+          nom: userInfo.name,
+          prenoms: userInfo.surname,
+          tel: userInfo.tel,
+          event_id: items[i].eventId,
+          event_ticket_price_id: items[i].ticketPriceId,
+          is_for_me: true,
+          payment_type: "online",
+          ticket_type: "virtual",
+          ticket_owner_info: {
+            nom: ticketOwnerInfo.name ? ticketOwnerInfo.name : userInfo.name,
+            prenoms: ticketOwnerInfo.surname
+              ? ticketOwnerInfo.surname
+              : userInfo.surname,
+            tel: ticketOwnerInfo.tel ? ticketOwnerInfo.tel : userInfo.tel,
+          },
+          delivery_information: {
+            district_id: 1,
+            adresse_geo: "",
+          },
         });
 
         console.log(response);
@@ -352,11 +367,9 @@ export default function PaymentMethod({
       ) {
         // initiate ticket generation
         setPaymentStatus("ticketgeneration");
-        await generateTickets();
+        await buyTickets();
 
-        //
         navigate("/paiement/succes");
-        return;
       } else if (
         paymentData.status === "FAIL" ||
         paymentData.status === "FAILLED"
@@ -388,12 +401,14 @@ export default function PaymentMethod({
     }
   };
 
-  async function payementCheckerTimer(seconds = 10000) {
+  async function payementCheckerTimer(seconds = 5000) {
     // Initialize the timer
-    timerRef.current = setTimeout(() => {
-      setAttemptCount((prev) => prev + 1);
-      payementStatusChecker();
-    }, seconds);
+    try {
+      timerRef.current = setTimeout(() => {
+        setAttemptCount((prev) => prev + 1);
+        payementStatusChecker();
+      }, seconds);
+    } catch (error) {}
   }
 
   const handleVisibilityChange = () => {

@@ -7,15 +7,18 @@ interface LogoProps {
 
 export default function Logo({ className = "h-8", style = {} }: LogoProps) {
   return (
+
+    // src="/assets/images/Logo.PNG" 
+
+
     <img 
-      src="/assets/images/Logo.PNG" 
+      src="https://web.passpro.app/assets/images/pass-pro.png" 
       alt="PassPro" 
       className={className}
       style={{ 
         objectFit: 'contain',
         objectPosition: 'left',
-        width: '100px',
-        height: '100px',
+        width: '180%',
         ...style 
       }}
     />

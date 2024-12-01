@@ -17,7 +17,7 @@ export default function TicketPayement() {
     setIsLoading(true);
 
     try {
-      const userUuid = userInfo.user_uuid || localStorage.getItem("user_uuid");
+      const userUuid = userInfo.uuid || localStorage.getItem("user_uuid");
 
       const ticketData = {
         user_uuid: userUuid,

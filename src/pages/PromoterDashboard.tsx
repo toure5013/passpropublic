@@ -31,7 +31,7 @@ export default function PromoterDashboard() {
   const getEventsStats = async () => {
     setIsLoading(true); // Show loading state
 
-    const userUuid = userInfo.user_uuid || localStorage.getItem("user_uuid");
+    const userUuid = userInfo.uuid || localStorage.getItem("user_uuid");
     try {
       const response = await PromoterEventService.getStatEvents(userUuid);
 
