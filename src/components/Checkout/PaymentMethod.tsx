@@ -98,10 +98,10 @@ export default function PaymentMethod({
     try {
       const response: any = await UserService.register({
         tel: ticketOwnerInfo.tel,
-        name: ticketOwnerInfo.name,
-        password: ticketOwnerInfo.password,
-        c_password: ticketOwnerInfo.c_password,
-        surname: ticketOwnerInfo.surname,
+        name: ticketOwnerInfo.name ? ticketOwnerInfo.name : "",
+        password: ticketOwnerInfo.password ? ticketOwnerInfo.password : "",
+        c_password: ticketOwnerInfo.c_password ? ticketOwnerInfo.c_password : "",
+        surname: ticketOwnerInfo.surname ? ticketOwnerInfo.surname : "",
       });
 
       if (response.success) {
