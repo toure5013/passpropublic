@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Minus, Plus, Trash2, Tag, X } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Minus, Plus, Trash2, Tag, X, LinkIcon } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import ImageLoader from '../components/ImageLoader';
 import { MyCustomEvent } from '../utils/eventtypes';
 import { useEventStore } from '../store/eventStore';
 import { configService } from '../providers/configService';
-import { use } from 'framer-motion/client';
+import CartTimer from '../components/CartTimer';
 
 export default function Cart() {
+  const navigate = useNavigate();
+
   const { 
     items, 
     removeFromCart, 
@@ -19,7 +21,10 @@ export default function Cart() {
     promoCode,
     promoDiscount,
     applyPromoCode,
-    removePromoCode
+    removePromoCode,
+    acceptTerms,
+    setAcceptTerms,
+    clearCart
   } = useCartStore();
 
   const [promoInput, setPromoInput] = useState('');
@@ -46,6 +51,11 @@ export default function Cart() {
     } else {
       setPromoError('Code promo invalide');
     }
+  };
+
+  const handleCartExpire = () => {
+    clearCart();
+    navigate('/');
   };
 
   if (items.length === 0) {
@@ -78,9 +88,13 @@ export default function Cart() {
   return (
     <div className="pt-4 sm:pt-6">
       <div className="max-w-lg mx-auto px-3 sm:px-4">
-        <h1 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
-          Tickets sélectionnés
-        </h1>
+      <div className="flex items-center justify-between mb-4">
+          <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
+            Tickets sélectionnés
+          </h1>
+          <CartTimer onExpire={handleCartExpire} />
+        </div>
+
 
         <AnimatePresence>
           <div className="space-y-3 sm:space-y-4">
@@ -221,6 +235,27 @@ export default function Cart() {
                 </span>
               </div>
             </div>
+
+
+            <label className="flex items-start gap-2 text-left mb-4">
+              <input
+                type="checkbox"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                className="mt-1 h-4 w-4 text-brand-red border-gray-300 rounded focus:ring-brand-red"
+              />
+              <span className="text-sm text-gray-600">
+                En poursuivant, j'accepte les{' '}
+                <a 
+                  href="/conditions" 
+                  target="_blank"
+                  className="text-brand-red hover:text-brand-red/80 font-medium inline-flex items-center gap-0.5"
+                >
+                  conditions générales d'utilisation
+                  <LinkIcon className="h-3 w-3" />
+                </a>
+              </span>
+            </label>
             
             <Link 
               to="/checkout"

@@ -90,16 +90,8 @@ export default function Login() {
       login();
 
       // Navigate based on user status
-      if (userInfo.status === -1) {
-        console.log("Redirecting to OTP page...");
-        toast.error(response["message"]);
-        // Replace with actual redirection to OTP page
-      } else {
-        console.log("Redirecting to home page...");
-        toast.success(response["message"]);
-        // use router to redirect to home
-        navigate("/home");
-      }
+      toast.success(response["message"]);
+      navigate("/home");
     } else {
       console.log("response");
       console.log(response["message"]);

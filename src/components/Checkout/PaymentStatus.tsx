@@ -3,16 +3,20 @@ import { useEffect, useRef, useState } from "react";
 import PaiementService from "../../providers/paiementService";
 import { usePayementStore } from "../../store/payementStore";
 import { Loader } from "lucide-react";
+import PaymentLoader from "../PaymentLoader";
 
 export default function PaymentStatus() {
   const navigate = useNavigate();
 
-  const { externalTransactionId, _be_removed_deepLinkUrl_, plateform } = usePayementStore();
+  const { externalTransactionId, _be_removed_deepLinkUrl_, plateform, amount , phone} = usePayementStore();
   const [isProcessing, setIsprocessing] = useState(false);
   const [instructions, setInstructions] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [attemptCount, setAttemptCount] = useState(0); // Track the number of attempts
   const timerRef = useRef<NodeJS.Timeout | null>(null); // Use a ref to store the timer
+  const [paymentStatus, setPaymentStatus] = useState<
+    "processing" | "success" | "error"
+  >("processing");
 
   const payementStatusChecker = async () => {
     try {
@@ -76,6 +80,8 @@ export default function PaymentStatus() {
     }
   }
 
+  // setPaymentStatus("success");
+
   
   useEffect(() => {
     setIsprocessing(false);
@@ -96,10 +102,8 @@ export default function PaymentStatus() {
       setInstructions("Une demande de débit de paiement a été envoyée à votre numéro de téléphone. Veuillez vérifier votre téléphone pour confirmer le paiement.");
       payementCheckerTimer();
     }else {
-      setInstructions("Veuillez cliquer sur le lien suivant afin de proceder au paiement.");
+      setInstructions("Veuillez cliquer sur le lien suivant afin de procéder au paiement.");
     }
-
-
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
@@ -114,6 +118,8 @@ export default function PaymentStatus() {
   console.log(plateform);
   console.log("---------------------");
 
+  console.log({ externalTransactionId, _be_removed_deepLinkUrl_, plateform });
+  
   if (isProcessing) {
     return (
       <div className="w-full">
@@ -132,6 +138,21 @@ export default function PaymentStatus() {
     );
   }
 
+
+  return (
+     (
+      <PaymentLoader
+        status={paymentStatus}
+        orderDetails={{
+          amount:+`${amount}`,
+          paymentMethod: plateform || "",
+          tel: phone,
+          // items: items,
+        }}
+      />
+    )
+  )
+
   return (
     <> 
       {_be_removed_deepLinkUrl_ ? (
@@ -145,6 +166,7 @@ export default function PaymentStatus() {
               <button
                 className="mt-3 flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end rounded-lg text-white text-sm font-medium hover:opacity-90 transition-opacity"
                 onClick={() => {
+                  if(_be_removed_deepLinkUrl_)
                   window.open(_be_removed_deepLinkUrl_, "_blank");
                   payementCheckerTimer()
                 }}

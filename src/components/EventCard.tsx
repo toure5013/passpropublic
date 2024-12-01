@@ -128,7 +128,7 @@ export default function EventCard(event: MyCustomEvent) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              Réserver
+              Payer
             </motion.button>
           </div>
         </div>

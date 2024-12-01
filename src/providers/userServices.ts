@@ -109,23 +109,34 @@ class UserService {
     }
   }
 
-  static async sendOtp(data: Record<string, any>): Promise<ApiResponse> {
+  static async sendOtp({tel, otp_type, name, surname}: {tel: string, otp_type: string, name?: string, surname?: string}): Promise<ApiResponse> {
     try {
       const response: AxiosResponse<ApiResponse> = await axios.post(
         `${this.baseURL}/api/users/resendOtp`,
-        data
+        {
+          tel,
+          type : otp_type,
+          name  : name? name : "",
+          surname : surname ? surname : ""
+        }
       );
       return response.data;
     } catch (error) {
+      console.log("error sendOtp")
+      console.log(error)
       return this.handleError(error);
     }
   }
 
-  static async checkOTP(data: Record<string, any>): Promise<ApiResponse> {
+  static async checkOTP({tel, otp_type, otp_code}: {tel: string, otp_code:string, otp_type: string}): Promise<ApiResponse> {
     try {
       const response: AxiosResponse<ApiResponse> = await axios.post(
         `${this.baseURL}/api/users/checkOtp`,
-        data
+        {
+          tel,
+          type : otp_type,
+          code : otp_code,
+        }
       );
       return response.data;
     } catch (error) {

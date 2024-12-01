@@ -1,35 +1,44 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PersonalInfo from "../components/Checkout/PersonalInfo";
 import PaymentMethod from "../components/Checkout/PaymentMethod";
 import { useCartStore } from "../store/cartStore";
 import UserService from "../providers/userServices";
 import { toast } from "react-toastify";
 import useAuthStore from "../store/loginStore";
+import CartTimer from "../components/CartTimer";
+import TicketOwnerInfo from "../components/Checkout/TicketOwnerInfo";
 
 type CheckoutStep = "personal-info" | "payment";
+
+interface TicketOwnerInfoType {
+  name: string;
+  surname: string;
+  tel: string;
+  birth_date?: string;
+}
 
 export default function Checkout() {
   const [currentStep, setCurrentStep] = useState<CheckoutStep>("personal-info");
   const [isLoading, setIsLoading] = useState(false);
   const { updateUserInfo, userInfo } = useAuthStore();
-  const [personalInfo, setPersonalInfo] = useState(userInfo ? userInfo : {});
+  const [ticketOwnerInfo, setTicketOwnerInfo] = useState(userInfo ? userInfo : {});
   const { isLoggedIn } = useAuthStore();
+  const navigate = useNavigate();
 
   const { getFinalTotal } = useCartStore();
 
-  const createUser = async (personalInfo: any) => {
+  const createUser = async (ticketOwnerInfo: any) => {
     setIsLoading(true);
 
     try {
-      const response: any = await UserService.register(personalInfo);
+      const response: any = await UserService.register(ticketOwnerInfo);
       if (response.success) {
         toast.success("Compte initié avec succès");
         const userInfo = response.user;
         userInfo.userType = "public";
 
         updateUserInfo(userInfo);
-        setPersonalInfo(userInfo);
+        setTicketOwnerInfo(userInfo);
         setIsLoading(true);
       } else {
         setIsLoading(true);
@@ -42,19 +51,23 @@ export default function Checkout() {
     }
   };
 
-  const handlePersonalInfoSubmit = async (buyerInfo: typeof personalInfo) => {
+  const handleTicketOwnerInfoSubmit = async (tickerOwnerInfo : TicketOwnerInfoType) => {
     if (isLoggedIn) {
       // change screen
-      setPersonalInfo({});
+      setTicketOwnerInfo({
+        tel : tickerOwnerInfo.tel,
+        name : tickerOwnerInfo.name,
+        surname : tickerOwnerInfo.surname
+      });
       setCurrentStep("payment");
       return;
     }
 
     // if user not logged in
     setIsLoading(true);
-    try {
+    try { 
       const response: any = await UserService.searchUserByPhoneNumber(
-        buyerInfo.tel
+        tickerOwnerInfo.tel
       );
 
       console.log(response);
@@ -75,7 +88,7 @@ export default function Checkout() {
 
         // update state
         updateUserInfo(userInfo);
-        setPersonalInfo(userInfo);
+        setTicketOwnerInfo(userInfo);
         setIsLoading(false);
 
         // change screen
@@ -84,13 +97,12 @@ export default function Checkout() {
         if (`${response.message}`.includes("n'existe pas")) {
           // create user account
           await createUser({
-            ...buyerInfo,
-            name: buyerInfo.name,
-            surname: buyerInfo.surname,
-            tel: buyerInfo.tel,
-            birth_date: "1995-01-26",
-            c_password: `${new Date().toISOString()}`,
-            password: `${new Date().toISOString()}`,
+            name: tickerOwnerInfo.name,
+            surname: tickerOwnerInfo.surname,
+            tel: tickerOwnerInfo.tel,
+            birth_date: tickerOwnerInfo.birth_date ? tickerOwnerInfo.birth_date : "1995-01-26",
+            c_password: `123456`,
+            password: `123456`,
             sponsor_code: "",
             district_id: 2,
           });
@@ -128,21 +140,26 @@ export default function Checkout() {
     <div className="pt-4 sm:pt-6 pb-20">
       <div className="max-w-lg mx-auto px-3 sm:px-4">
         <div className="bg-white rounded-lg shadow-sm p-4">
-          <h1 className="text-xl font-bold text-gray-900 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-xl font-bold text-gray-900">
             Finaliser votre commande
           </h1>
+          <CartTimer onExpire={() => navigate("/cart")} />
+        </div>
 
           {
             currentStep === "personal-info" ? (
-              <PersonalInfo
-                initialValues={personalInfo}
-                onSubmit={handlePersonalInfoSubmit}
+              <TicketOwnerInfo
+                initialValues={ticketOwnerInfo}
+                onSubmit={handleTicketOwnerInfoSubmit}
+                isLoggedIn={isLoggedIn}
                 isLoading={isLoading}
               />
             ) : currentStep === "payment" ? (
               <PaymentMethod
-                payment_number={personalInfo.tel}
-                userInfo={personalInfo}
+                payment_number={ticketOwnerInfo.tel ? ticketOwnerInfo.tel : userInfo.tel}
+                ticketOwnerInfo={ticketOwnerInfo ? ticketOwnerInfo : userInfo}
+                userInfo={userInfo}
                 amount={getFinalTotal()} // À remplacer par le montant réel du panier
               />
             ) : null //ADD OTP SCREEN

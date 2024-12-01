@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 interface TransactionAllInfo {
-  phone: string;
+  tel : string;
   amount: number;
   currency: string;
   amountXof: number;
@@ -17,6 +17,7 @@ interface TransactionAllInfo {
 }
 
 interface TransactionState {
+  phone : string
   transactionId: string | null;
   externalTransactionId: string | null;
   status: "PENDING" | "SUCCESS" | "FAIL" | null;
@@ -33,6 +34,7 @@ interface TransactionState {
 }
 
 export const usePayementStore = create<TransactionState>((set) => ({
+  phone : sessionStorage.getItem("phone") || "",
   transactionId: sessionStorage.getItem("transactionId") || null,
   externalTransactionId:
     sessionStorage.getItem("externalTransactionId") || null,
