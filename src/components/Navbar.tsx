@@ -17,11 +17,10 @@ export default function Navbar() {
 
   return (
     <>
-      {userInfo.type != "promoter" && userInfo.type != "admin" && userInfo.type != "event_manager" ? (
-        <nav className="bg-white shadow-md sticky top-0 z-50">
+       <nav className="bg-white shadow-md sticky top-0 z-50">
           <div className="max-w-lg mx-auto px-3 sm:px-4">
             <div className="flex justify-between items-center h-12 sm:h-14">
-              <Link to="/" className="flex items-center">
+              <Link to={userInfo.type == "promoter" || userInfo.type == "admin" || userInfo.type == "event_manager" ? "/espace-promoteur" :  "/"} className="flex items-center">
                 <Logo
                   className="h-6 sm:h-8 w-auto"
                   style={{ minWidth: "160px" }}
@@ -107,7 +106,6 @@ export default function Navbar() {
             </div>
           </div>
         </nav>
-      ) : null}
     </>
   );
 }

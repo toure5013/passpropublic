@@ -13,10 +13,11 @@ import {
   Sparkles,
   Loader,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import EventCard from "../components/EventCard";
 import EventService from "../providers/eventService";
 import { useEventStore } from "../store/eventStore";
+import useAuthStore from "../store/loginStore";
 
 // Fixed data
 const features = [
@@ -71,9 +72,12 @@ export default function Home() {
   const [error, setError] = useState<string>("");
 
   const { updateEvent } = useEventStore();
+  const navigate = useNavigate();
 
   // Filtrer les événements tendances
   const trendingEvents = events.filter((event) => event.trending);
+  const { userInfo, isLoggedIn } = useAuthStore();
+
 
   //API CALLS
   // Function to search events based on the search key
@@ -183,7 +187,12 @@ export default function Home() {
 
   // Optionally, call the API when the component mounts
   useEffect(() => {
-    getEventTypesWithFirstEvents(); // Call to get event types and first events
+    if((userInfo.type == "promoter" || userInfo.type == "admin" || userInfo.type == "event_manager") && isLoggedIn ){
+      navigate("/espace-promoteur");
+      return;
+    }
+      getEventTypesWithFirstEvents(); // Call to get event types and first events
+
   }, []); // Empty array ensures it only runs on component mount
 
   return (
