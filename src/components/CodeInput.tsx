@@ -8,6 +8,7 @@ interface CodeInputProps {
   onKeyDown: (index: number, e: React.KeyboardEvent) => void;
   length?: number;
   error?: string;
+  disabled?: boolean;
 }
 
 export default function CodeInput({ 
@@ -15,6 +16,7 @@ export default function CodeInput({
   onChange, 
   onKeyDown, 
   length = 6,
+  disabled,
   error
 }: CodeInputProps) {
   const isComplete = value.every(v => v !== '');
@@ -30,6 +32,7 @@ export default function CodeInput({
               id={`code-${index}`}
               type="text"
               inputMode="numeric"
+              disabled={disabled}
               pattern="[0-9]*"
               maxLength={1}
               value={value[index]}

@@ -29,7 +29,6 @@ import ForgotPassword from "./pages/ForgotPassword";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PaymentIframe from "./components/Checkout/PaymentIframe";
-import PaymentStatus from "./components/Checkout/PaymentStatus";
 import { CartTimerProvider } from "./context/CartTimerContext";
 
 function ScrollToTop() {
@@ -91,10 +90,6 @@ function AppContent() {
                       element={<PaymentSuccess />}
                     />
                     <Route path="/paiement/erreur" element={<PaymentError />} />
-                    <Route
-                      path="/paiement/status"
-                      element={<PaymentStatus />}
-                    />
                   </Routes>
                 </CartTimerProvider>
               ) : (

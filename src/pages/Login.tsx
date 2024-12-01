@@ -22,12 +22,13 @@ type UserType = "public" | "promoter";
 export default function Login() {
   const [userType, setUserType] = useState<UserType>("public");
   const [showPassword, setShowPassword] = useState(false);
-  const [phone, setPhone] = useState("0777974514");
-  const [password, setPassword] = useState("123456");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
   const { login, updateUserInfo, isLoggedIn, userInfo } = useAuthStore();
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = useState("");
   const [code, setCode] = useState(["", "", "", "", "", ""]);
+  const [otpSent, setOtpSent] = useState(false);
 
   const navigate = useNavigate();
 
@@ -53,6 +54,30 @@ export default function Login() {
     }
   };
 
+  const handleSendOtp = async () => {
+    try {
+      const response: any = await UserService.register({
+        tel: phone,
+        name: "user",
+        surname: "user",
+      });
+
+      if (response.success) {
+        toast.success(response.message);
+        setError("");
+        setOtpSent(true);
+      } else {
+        toast.error(response.message);
+      }
+    } catch (error: any) {
+      toast.error(
+        error.message
+          ? error.message
+          : "Une erreur s'est produite. Veuillez recommencer."
+      );
+    }
+  };
+
   const handleCodeKeyDown = (index: number, e: React.KeyboardEvent) => {
     if (e.key === "Backspace" && !code[index] && index > 0) {
       const prevInput = document.getElementById(`code-${index - 1}`);
@@ -61,15 +86,15 @@ export default function Login() {
   };
 
   const loginPublic = async () => {
-    const enteredCode = code.join('');
+    const enteredCode = code.join("");
     if (!enteredCode || enteredCode.length !== 6) {
-      setError('Veuillez entrer le code complet');
+      setError("Veuillez entrer le code complet");
       return;
     }
 
     const response: any = await UserService.login({
       login: phone,
-      password : enteredCode,
+      password: enteredCode,
     });
 
     console.log(phone, password, userType);
@@ -266,18 +291,27 @@ export default function Login() {
                   </button>
                 </div>
               </div>
-            ) : (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Code à 6 chiffres
-                </label>
-                <CodeInput
-                  value={code}
-                  onChange={handleCodeChange}
-                  onKeyDown={handleCodeKeyDown}
-                  error={error}
-                />
-              </div>
+            ) : !otpSent ? null : (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Code à 6 chiffres
+                  </label>
+                  <CodeInput
+                    value={code}
+                    onChange={handleCodeChange}
+                    onKeyDown={handleCodeKeyDown}
+                    error={error}
+                  />
+
+                  <button
+                    onClick={() => handleSendOtp()}
+                    className="text-sm mt-3 text-brand-red hover:text-brand-red/80"
+                  >
+                    Renvoyer le code
+                  </button>
+                </div>
+              </>
             )}
 
             {error && (
@@ -309,6 +343,13 @@ export default function Login() {
               <div className="w-full flex items-center justify-center">
                 <Loader color="#FF8A00" />
               </div>
+            ) : !otpSent && userType === "public" ? (
+              <button
+                onClick={() => handleSendOtp()}
+                className="w-full py-3 bg-gradient-to-r from-brand-gradient-start to-brand-gradient-end text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+              >
+                Recevoir le code de confirmation
+              </button>
             ) : (
               <button
                 type="submit"

@@ -10,14 +10,13 @@ import {
 } from "lucide-react";
 import { sanitizeWaveUrlBasedOnDevice } from "../utils/paymentUtils";
 
-
 interface PayementInstructions {
-    description: string;
-    deepLink?: string;
-    redirectUrl?: string;
+  description: string;
+  deepLink?: string;
+  redirectUrl?: string;
 }
 interface PaymentLoaderProps {
-  status: "processing" | "success" | "error";
+  status: "processing" | "success" | "error" | "ticketgeneration";
   message?: string;
   instructions?: PayementInstructions;
   orderDetails?: {
@@ -53,6 +52,14 @@ export default function PaymentLoader({
         return {
           icon: <CheckCircle2 className="h-12 w-12 text-green-500" />,
           text: message || "Paiement effectué avec succès !",
+          bgColor: "bg-green-50",
+          textColor: "text-green-600",
+          instruction: "Vos tickets seront disponibles dans quelques instants.",
+        };
+      case "ticketgeneration":
+        return {
+          icon: <CheckCircle2 className="h-12 w-12 text-green-500" />,
+          text: message || "Génération des tickets en cours !",
           bgColor: "bg-green-50",
           textColor: "text-green-600",
           instruction: "Vos tickets seront disponibles dans quelques instants.",
@@ -122,7 +129,10 @@ export default function PaymentLoader({
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <CreditCard className="h-4 w-4 text-xs" />
-                 Paiement par  <span className="font-bold text-brand-red">{orderDetails.paymentMethod}</span>
+                  Paiement par{" "}
+                  <span className="font-bold text-brand-red">
+                    {orderDetails.paymentMethod}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Phone className="h-4 w-4 text-xs" />
@@ -131,9 +141,19 @@ export default function PaymentLoader({
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Info className="h-4 w-4 text-brand-red" />
                   <span className="text-xs font-medium text-gray-900">
-                    {instructions?.description} {instructions?.redirectUrl ? (
-                      <a href={sanitizeWaveUrlBasedOnDevice(instructions.redirectUrl)} target="_blank" className="text-brand-red"> cliquez ici </a>
-                    ) : null } 
+                    {instructions?.description}{" "}
+                    {instructions?.redirectUrl ? (
+                      <a
+                        href={sanitizeWaveUrlBasedOnDevice(
+                          instructions.redirectUrl
+                        )}
+                        target="_blank"
+                        className="text-brand-red"
+                      >
+                        {" "}
+                        cliquez ici{" "}
+                      </a>
+                    ) : null}
                   </span>
                 </div>
               </div>

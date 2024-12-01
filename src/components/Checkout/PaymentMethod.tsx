@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PaiementService from "../../providers/paiementService";
 import { toast } from "react-toastify";
@@ -9,11 +9,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, Shield, Smartphone } from "lucide-react";
 import CodeInput from "../CodeInput";
 import PaymentLoader from "../PaymentLoader";
+import { useCartStore } from "../../store/cartStore";
+import TicketService from "../../providers/ticketService";
 
 interface PaymentMethodProps {
   amount: number;
   ticketOwnerInfo: any; //information servant à l'achat du ticket
-  userInfo: any;
   payment_number: string;
 }
 
@@ -65,7 +66,6 @@ const paymentOptions: PaymentOption[] = [
 export default function PaymentMethod({
   amount,
   ticketOwnerInfo,
-  userInfo,
   payment_number,
 }: PaymentMethodProps) {
   const navigate = useNavigate();
@@ -73,38 +73,37 @@ export default function PaymentMethod({
   const [isProcessing, setIsProcessing] = useState(false);
   const { setTransaction, setTransactionAllInfo, externalTransactionId } =
     usePayementStore();
-  const { login, updateUserInfo, isLoggedIn } = useAuthStore();
+  const { login, updateUserInfo, isLoggedIn, userInfo } = useAuthStore();
+  const { items } = useCartStore();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<
-    "processing" | "success" | "error" | null
+    "processing" | "success" | "error" | "ticketgeneration" | null
   >(null);
 
   // OTP
   const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [otpError, setOtpError] = useState("");
   const [instructions, setInstructions] = useState({} as PayementInstructions);
+
+  const [transactionLocalInformation, setTransactionLocalInformation] =
+    useState({} as any);
 
   // payement status checker
   const [errorMessage, setErrorMessage] = useState("");
   const [attemptCount, setAttemptCount] = useState(0); // Track the number of attempts
   const timerRef = useRef<NodeJS.Timeout | null>(null); // Us
 
-  const handleSendOtp = async ({
-    otp_type = "connection",
-  }: {
-    otp_type?: string;
-  }) => {
-    // setOtpSent(true);
-    // return;
-
+  const handleSendOtp = async () => {
     try {
-      const response = await UserService.sendOtp({
+      const response: any = await UserService.register({
         tel: ticketOwnerInfo.tel,
-        otp_type: otp_type,
         name: ticketOwnerInfo.name,
+        password: ticketOwnerInfo.password,
+        c_password: ticketOwnerInfo.c_password,
         surname: ticketOwnerInfo.surname,
       });
+
       if (response.success) {
         toast.success(response.message);
         setOtpSent(true);
@@ -120,17 +119,16 @@ export default function PaymentMethod({
     }
   };
 
-  const handleVerifyOtp = async (otp_type = "connection") => {
+  const handleVerifyOtp = async () => {
     if (!isOtpComplete) {
       setOtpError("Veuillez entrer le code complet");
       return;
     }
 
     try {
-      const response: any = await UserService.checkOTP({
-        tel: ticketOwnerInfo.tel,
-        otp_code: otp.join(""),
-        otp_type: otp_type,
+      const response: any = await UserService.login({
+        login: ticketOwnerInfo.tel,
+        password: code.join(""),
       });
 
       if (response.success && response.user) {
@@ -146,11 +144,15 @@ export default function PaymentMethod({
 
         // update state
         updateUserInfo(userInfo);
+
         login();
 
         toast.success(response["message"]);
+        setIsProcessing(false);
+        setShowConfirmation(false);
+
         //init payment
-        await handlePayment();
+        // await handlePayment();
       } else {
         toast.error(response.message);
       }
@@ -165,9 +167,9 @@ export default function PaymentMethod({
 
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) return;
-    const newOtp = [...otp];
+    const newOtp = [...code];
     newOtp[index] = value;
-    setOtp(newOtp);
+    setCode(newOtp);
     setOtpError("");
 
     if (value && index < 5) {
@@ -177,16 +179,46 @@ export default function PaymentMethod({
   };
 
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
+    if (e.key === "Backspace" && !code[index] && index > 0) {
       const prevInput = document.getElementById(`code-${index - 1}`);
       prevInput?.focus();
     }
   };
 
-  const isOtpComplete = otp.every((digit) => digit !== "");
+  const isOtpComplete = code.every((digit) => digit !== "");
+
+  // GENERATE USET TICKET
+  const generateTickets = async () => {
+    for (let i = 0; i < items.length; i++) {
+      console.log({
+        event_id: items[i].eventId,
+        tel: ticketOwnerInfo.tel,
+        event_ticket_price_id: items[i].ticketPriceId,
+        quantity: items[i].quantity,
+        user_uuid: userInfo.uuid,
+      });
+
+      try {
+        const response: any = await TicketService.generateTicket({
+          event_id: items[i].eventId,
+          tel: ticketOwnerInfo.tel,
+          event_ticket_price_id: items[i].ticketPriceId,
+          quantity: items[i].quantity,
+          user_uuid: userInfo.uuid,
+        });
+
+        console.log(response);
+
+        if (response.success) {
+          console.log(response.message);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
 
   // Payement and payement status checker
-
   const handlePayment = async () => {
     if (!selectedMethod || isProcessing) return;
 
@@ -196,21 +228,14 @@ export default function PaymentMethod({
       return;
     }
 
-    // Is already connecected
+    // Is already conneceted
     setIsProcessing(true);
     setShowConfirmation(false);
 
     try {
-      console.log({
+      const response = await PaiementService.cashout({
         user_uuid: userInfo.uuid,
         number_to_debit: payment_number,
-        platform: selectedMethod,
-        amount: amount,
-      });
-
-      const response = await PaiementService.cashout({
-        user_uuid: ticketOwnerInfo.uuid,
-        number_to_debit: payment_number ? payment_number : ticketOwnerInfo.tel,
         platform: selectedMethod,
         amount: amount,
       });
@@ -238,22 +263,19 @@ export default function PaymentMethod({
         const plateform = selectedMethod;
 
         //  Save data to session storage
-        await sessionStorage.setItem(
-          "externalTransactionId",
-          externalTransactionId
-        );
-        await sessionStorage.setItem("deepLinkUrl", deepLinkUrl);
-        await sessionStorage.setItem("amount", amount.toString());
-        await sessionStorage.setItem(
+        sessionStorage.setItem("externalTransactionId", externalTransactionId);
+        sessionStorage.setItem("deepLinkUrl", deepLinkUrl);
+        sessionStorage.setItem("amount", amount.toString());
+        sessionStorage.setItem(
           "transactionallinfo",
           JSON.stringify(response.data.data)
         );
-        await sessionStorage.setItem(
+        sessionStorage.setItem(
           "_be_removed_deepLinkUrl_",
           _be_removed_deepLinkUrl_
         );
-        await sessionStorage.setItem("codeService", codeService);
-        await sessionStorage.setItem("plateform", plateform);
+        sessionStorage.setItem("codeService", codeService);
+        sessionStorage.setItem("plateform", plateform);
 
         setInstructions({
           description:
@@ -273,30 +295,52 @@ export default function PaymentMethod({
           plateform,
         });
 
-        await setTransactionAllInfo(response.data.data);
-        setIsProcessing(false);
+        setTransactionLocalInformation({
+          externalTransactionId,
+          deepLinkUrl,
+          amount,
+          _be_removed_deepLinkUrl_,
+          codeService,
+          plateform,
+          transactionId: response.data.data.transactionId,
+          tel: response.data.data.tel,
+        });
 
+        setTransactionAllInfo(response.data.data);
+        setIsProcessing(false);
         setPaymentStatus("processing");
 
         // Activate payement checker
-        payementCheckerTimer();
+        await payementCheckerTimer();
       } else {
         setIsProcessing(false);
         toast.error(response.message);
       }
-    } catch (error:any) {
-      toast.error(error.message ? error.message : "Une erreur s'est produite. Veuillez recommencer.");
+    } catch (error: any) {
+      toast.error(
+        error.message
+          ? error.message
+          : "Une erreur s'est produite. Veuillez recommencer."
+      );
       setIsProcessing(false);
       setPaymentStatus("error");
       navigate("/paiement/erreur");
     }
   };
+
   const payementStatusChecker = async () => {
     try {
       const response = await PaiementService.checkTransaction(
-        `${externalTransactionId}`
+        `${
+          transactionLocalInformation.externalTransactionId
+            ? transactionLocalInformation.externalTransactionId
+            : externalTransactionId
+        }`
+        // "19620241201201320674cc3606edda"
       );
       const paymentData = response.data ? response.data : {};
+
+      console.log(paymentData);
 
       if (!paymentData) {
         return;
@@ -306,8 +350,12 @@ export default function PaymentMethod({
         paymentData.status === "SUCCESS" ||
         paymentData.status === "SUCCESSFUL"
       ) {
-        navigate("/paiement/succes");
         // initiate ticket generation
+        setPaymentStatus("ticketgeneration");
+        await generateTickets();
+
+        //
+        navigate("/paiement/succes");
         return;
       } else if (
         paymentData.status === "FAIL" ||
@@ -342,17 +390,26 @@ export default function PaymentMethod({
 
   async function payementCheckerTimer(seconds = 10000) {
     // Initialize the timer
-    if (attemptCount < 20) {
-      timerRef.current = setTimeout(() => {
-        setAttemptCount((prev) => prev + 1);
-        payementStatusChecker();
-      }, seconds);
-    } else {
-      // Is already connecected
-      setPaymentStatus("error");
-      navigate("/paiement/erreur");
-    }
+    timerRef.current = setTimeout(() => {
+      setAttemptCount((prev) => prev + 1);
+      payementStatusChecker();
+    }, seconds);
   }
+
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === "hidden" && timerRef.current) {
+      clearTimeout(timerRef.current); // Clear the timer if the page becomes hidden
+      timerRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (timerRef.current) clearTimeout(timerRef.current); // Clean up the timer
+    };
+  }, []);
 
   return (
     <div>
@@ -486,7 +543,7 @@ export default function PaymentMethod({
 
                 {!otpSent ? (
                   <button
-                    onClick={() => handleSendOtp({ otp_type: "connection" })}
+                    onClick={() => handleSendOtp()}
                     className="px-4 py-2 bg-brand-button text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
                   >
                     Recevoir le code de confirmation
@@ -497,13 +554,13 @@ export default function PaymentMethod({
                       Veuillez saisir le code reçu par SMS
                     </p>
                     <CodeInput
-                      value={otp}
+                      value={code}
                       onChange={handleOtpChange}
                       onKeyDown={handleOtpKeyDown}
                       error={otpError}
                     />
                     <button
-                      onClick={() => handleSendOtp({ otp_type: "resend_otp" })}
+                      onClick={() => handleSendOtp()}
                       className="text-sm text-brand-red hover:text-brand-red/80"
                     >
                       Renvoyer le code
@@ -532,7 +589,7 @@ export default function PaymentMethod({
                   Annuler
                 </button>
                 <button
-                  onClick={() => handleVerifyOtp("connection")}
+                  onClick={() => handleVerifyOtp()}
                   disabled={!isOtpComplete || isProcessing}
                   className="flex-1 px-4 py-2 text-sm font-medium text-white bg-brand-button rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                 >

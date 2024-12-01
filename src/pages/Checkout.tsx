@@ -21,7 +21,9 @@ export default function Checkout() {
   const [currentStep, setCurrentStep] = useState<CheckoutStep>("personal-info");
   const [isLoading, setIsLoading] = useState(false);
   const { updateUserInfo, userInfo } = useAuthStore();
-  const [ticketOwnerInfo, setTicketOwnerInfo] = useState(userInfo ? userInfo : {});
+  const [ticketOwnerInfo, setTicketOwnerInfo] = useState(
+    userInfo ? userInfo : {}
+  );
   const { isLoggedIn } = useAuthStore();
   const navigate = useNavigate();
 
@@ -51,21 +53,23 @@ export default function Checkout() {
     }
   };
 
-  const handleTicketOwnerInfoSubmit = async (tickerOwnerInfo : TicketOwnerInfoType) => {
-    if (isLoggedIn) {
-      // change screen
-      setTicketOwnerInfo({
-        tel : tickerOwnerInfo.tel,
-        name : tickerOwnerInfo.name,
-        surname : tickerOwnerInfo.surname
-      });
-      setCurrentStep("payment");
-      return;
-    }
+  const handleTicketOwnerInfoSubmit = async (
+    tickerOwnerInfo: TicketOwnerInfoType
+  ) => {
+    // change screen
+    setTicketOwnerInfo({
+      tel: tickerOwnerInfo.tel,
+      name: tickerOwnerInfo.name,
+      surname: tickerOwnerInfo.surname,
+    });
+    setCurrentStep("payment");
+    return;
+  };
 
-    // if user not logged in
-    setIsLoading(true);
-    try { 
+  const searchUserByPhoneAndCreate = async (
+    tickerOwnerInfo: TicketOwnerInfoType
+  ) => {
+    try {
       const response: any = await UserService.searchUserByPhoneNumber(
         tickerOwnerInfo.tel
       );
@@ -100,11 +104,13 @@ export default function Checkout() {
             name: tickerOwnerInfo.name,
             surname: tickerOwnerInfo.surname,
             tel: tickerOwnerInfo.tel,
-            birth_date: tickerOwnerInfo.birth_date ? tickerOwnerInfo.birth_date : "1995-01-26",
+            birth_date: tickerOwnerInfo.birth_date
+              ? tickerOwnerInfo.birth_date
+              : "1995-01-26",
             c_password: `123456`,
             password: `123456`,
             sponsor_code: "",
-            district_id: 2,
+            district_id: 1,
           });
 
           setCurrentStep("payment");
@@ -135,17 +141,16 @@ export default function Checkout() {
     }
   }, []);
 
-
   return (
     <div className="pt-4 sm:pt-6 pb-20">
       <div className="max-w-lg mx-auto px-3 sm:px-4">
         <div className="bg-white rounded-lg shadow-sm p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-bold text-gray-900">
-            Finaliser votre commande
-          </h1>
-          <CartTimer onExpire={() => navigate("/cart")} />
-        </div>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-xl font-bold text-gray-900">
+              Finaliser votre commande
+            </h1>
+            <CartTimer onExpire={() => navigate("/cart")} />
+          </div>
 
           {
             currentStep === "personal-info" ? (
@@ -157,9 +162,10 @@ export default function Checkout() {
               />
             ) : currentStep === "payment" ? (
               <PaymentMethod
-                payment_number={ticketOwnerInfo.tel ? ticketOwnerInfo.tel : userInfo.tel}
+                payment_number={
+                  ticketOwnerInfo.tel ? ticketOwnerInfo.tel : userInfo.tel
+                }
                 ticketOwnerInfo={ticketOwnerInfo ? ticketOwnerInfo : userInfo}
-                userInfo={userInfo}
                 amount={getFinalTotal()} // À remplacer par le montant réel du panier
               />
             ) : null //ADD OTP SCREEN

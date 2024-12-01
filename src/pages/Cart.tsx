@@ -108,11 +108,11 @@ export default function Cart() {
               >
                 <div className="flex gap-2 p-2 sm:p-3">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-lg overflow-hidden">
-                    <ImageLoader
+                    {getEventByIdAsync ? <ImageLoader
                        src={configService.baseUrlImage + getEventByIdAsync(item.eventId).event_ticket_img}
                        alt={getEventByIdAsync(item.eventId).event_name}
                       className="w-full h-full object-cover"
-                    />
+                    /> : ''}
                   </div>
 
                   <div className="flex-1 min-w-0">

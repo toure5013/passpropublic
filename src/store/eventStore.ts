@@ -27,7 +27,7 @@ export const useEventStore = create<eventStore>()(
         set({ allEvents: updatedEvents });
       },
       getEventById: (id: any) => {
-        let allEvents = JSON.parse(localStorage.getItem('allEvents') as string);
+        let allEvents = JSON.parse(localStorage.getItem('allEvents') as string) ? JSON.parse(localStorage.getItem('allEvents') as string) : [];
         return allEvents.find((e: any) => e.id == id);
       },
       getAllEvents: () => {

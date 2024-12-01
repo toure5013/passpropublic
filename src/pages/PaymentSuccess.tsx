@@ -27,7 +27,7 @@ export default function PaymentSuccess() {
           </motion.div>
 
           <h1 className="text-xl font-bold text-gray-900 mb-2">
-            Paiement réussi ! (en attente de génération des tickets)
+            Paiement réussi ! 
           </h1>
           
           <p className="text-sm text-gray-600 mb-6">
