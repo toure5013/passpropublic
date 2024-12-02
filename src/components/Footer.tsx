@@ -18,10 +18,10 @@ export default function Footer() {
           </nav>
 
           <div className="flex items-center gap-4 text-gray-400">
-            <a href="tel:+2250700000000" className="hover:text-brand-red transition-colors">
+            <a href="tel:+2250759949494" className="hover:text-brand-red transition-colors">
               <Phone className="h-5 w-5" />
             </a>
-            <a href="mailto:contact@passpro.ci" className="hover:text-brand-red transition-colors">
+            <a href="mailto:contact@passpro.app" className="hover:text-brand-red transition-colors">
               <Mail className="h-5 w-5" />
             </a>
             <a href="https://facebook.com/passpro" target="_blank" rel="noopener noreferrer" className="hover:text-brand-red transition-colors">

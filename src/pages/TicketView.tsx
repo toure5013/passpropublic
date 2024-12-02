@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Download } from 'lucide-react';
 import jsPDF from 'jspdf';
@@ -8,25 +8,22 @@ import TicketHeader from '../components/TicketView/TicketHeader';
 import TicketCover from '../components/TicketView/TicketCover';
 import TicketInfo from '../components/TicketView/TicketInfo';
 import TicketGuidelines from '../components/TicketView/TicketGuidelines';
-import Logo from '../components/Logo';
+import { MyCustomTicket } from '../utils/tickettypes';
+import { configService } from '../providers/configService';
+import { useTicketStore } from '../store/ticketStore';
+import { useParams } from 'react-router-dom';
+import { processTicket } from '../utils/ticketfunction';
 
 interface TicketViewProps {
-  ticket: {
-    id: string;
-    eventTitle: string;
-    date: string;
-    time: string;
-    location: string;
-    ticketType: string;
-    qrCode: string;
-    coverImage: string;
-    price?: string;
-  }
+  ticket: MyCustomTicket
 }
 
-export default function TicketView({ ticket }: TicketViewProps) {
+export default function TicketView() {
+  const { id } = useParams();
+
   const ticketRef = useRef<HTMLDivElement>(null);
   const downloadButtonRef = useRef<HTMLButtonElement>(null);
+  const [ticket] = useTicketStore(state => [state.getTicketById(parseInt(id || ''))]);
 
   const downloadPDF = async () => {
     if (!ticketRef.current || !downloadButtonRef.current) return;
@@ -159,6 +156,20 @@ export default function TicketView({ ticket }: TicketViewProps) {
       }
     }
   };
+  // const {getTicketById} = useTicketStore();
+
+
+  useEffect(() => {
+    if (id) {
+      // let ticket = getTicketById(+id);
+      console.log(id);
+      console.log("//////////////////////////// ticket ////////////////////////////");
+      console.log(ticket);
+      
+    }else  {
+      return;
+    }
+  }, [id]);
 
   return (
     <div className="pt-4 sm:pt-6 pb-20">
@@ -171,22 +182,22 @@ export default function TicketView({ ticket }: TicketViewProps) {
           <TicketHeader />
           
           <TicketCover 
-            imageUrl={ticket.coverImage}
-            title={ticket.eventTitle}
+            imageUrl={(configService.baseUrlImage +  ticket.event.event_ticket_img)}
+            title={ticket.event.event_name}
           />
           
           <TicketInfo
-            date={ticket.date}
-            time={ticket.time}
-            location={ticket.location}
-            ticketType={ticket.ticketType}
+            date={ticket.event.event_date}
+            time={ticket.event.event_hour}
+            location={ticket.event.event_localization}
+            ticketType={ticket.event.ticket_virtual ? 'Virtuel' : 'Physique'}
             ticketId={ticket.id}
-            price={ticket.price}
+            price={ticket.event_ticket_price.price.toString()}
           />
           
           <div className="flex items-center justify-center py-6" data-qr-code>
             <QRCodeSVG
-              value={ticket.qrCode}
+              value={ processTicket(ticket)}
               size={180}
               level="H"
               includeMargin={true}

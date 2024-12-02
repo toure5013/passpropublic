@@ -1,28 +1,13 @@
 import React from 'react';
 import EventCard from '../components/EventCard';
+import { MyCustomEvent } from '../utils/eventtypes';
+import { useWishlistStore } from '../store/wishlistStore';
 
-interface Event {
-  id: string;
-  title: string;
-  date: string;
-  location: string;
-  image: string;
-  price: string;
-}
 
 export default function Wishlist() {
-  const [events, setEvents] = React.useState<Event[]>([
-    {
-      id: '1',
-      title: 'DJ Arafat en concert',
-      date: '31 Juillet 2024',
-      location: 'Palais de la culture d\'Abidjan',
-      image: 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14',
-      price: '5000 F CFA'
-    }
-  ]);
+  const {items} = useWishlistStore();
 
-  if (events.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="pt-4 sm:pt-6">
         <div className="max-w-lg mx-auto px-3 sm:px-4">
@@ -43,7 +28,7 @@ export default function Wishlist() {
     <div className="pt-4 sm:pt-6">
       <div className="max-w-lg mx-auto px-3 sm:px-4">
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
-          {events.map((event) => (
+          {items.map((event) => (
             <EventCard 
               key={event.id}
               {...event}

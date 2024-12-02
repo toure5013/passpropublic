@@ -3,65 +3,83 @@ import { Minus, Plus, Ticket } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCartStore } from '../../store/cartStore';
+import { MyCustomEvent, MyCustomEventTicketPrice } from '../../utils/eventtypes';
 
-interface TicketCategory {
-  id: string;
-  name: string;
-  price: number;
-  description: string;
-  available: number;
-}
+
 
 interface TicketSelectorProps {
-  eventId: string;
+  event : MyCustomEvent,
+  eventId: number;
   eventTitle: string;
-  categories: TicketCategory[];
+  ticketPrices: MyCustomEventTicketPrice[];
 }
 
-export default function TicketSelector({ eventId, eventTitle, categories }: TicketSelectorProps) {
+export default function TicketSelector({ event , eventId, eventTitle, ticketPrices }: TicketSelectorProps) {
   const navigate = useNavigate();
-  const addToCart = useCartStore(state => state.addToCart);
-  const [selections, setSelections] = useState<Record<string, number>>(() => {
-    return categories.reduce((acc, category) => ({
-      ...acc,
-      [category.id]: 0
-    }), {});
+  const { 
+    items, 
+    removeFromCart, 
+    getTotal, 
+    getFinalTotal,
+    promoCode,
+    promoDiscount,
+    applyPromoCode,
+    addToCart,
+    removePromoCode
+  } = useCartStore();
+  
+  const [selections, setSelections] = useState<Record<number, number>>(() => {
+    //if items is not empty, set selections to items
+    if (items.length > 0) {
+      return items.reduce((acc, item) => ({
+        ...acc,
+        [item.ticketPriceId]: item.quantity
+      }), {});
+    }else {
+      return ticketPrices.reduce((acc, ticketPrice) => ({
+        ...acc,
+        [ticketPrice.id]: 0
+      }), {});
+    }
+  
   });
 
-  const updateQuantity = (categoryId: string, delta: number) => {
-    const currentQuantity = selections[categoryId];
-    const category = categories.find(c => c.id === categoryId);
+  const updateQuantity = (ticketPriceId: number, delta: number) => {
+    console.log("j'update");
     
-    if (!category) return;
+    const currentQuantity = selections[ticketPriceId] ? selections[ticketPriceId] : 0;
+    const ticketPrice = ticketPrices.find(c => c.id === ticketPriceId);
+    
+    if (!ticketPrice) return;
     
     const newQuantity = currentQuantity + delta;
-    if (newQuantity >= 0 && newQuantity <= Math.min(10, category.available)) {
+    if (newQuantity >= 0) {
       setSelections(prev => ({
         ...prev,
-        [categoryId]: newQuantity
+        [ticketPriceId]: newQuantity
       }));
     }
   };
 
   const hasSelections = Object.values(selections).some(quantity => quantity > 0);
   
-  const totalAmount = categories.reduce((sum, category) => {
-    return sum + (category.price * (selections[category.id] || 0));
+  const totalAmount = ticketPrices.reduce((sum, ticketPrice) => {
+    return sum + (ticketPrice.price * (selections[ticketPrice.id] || 0));
   }, 0);
 
   const handleProceedToCheckout = () => {
     // Ajouter chaque sélection au panier
-    Object.entries(selections).forEach(([categoryId, quantity]) => {
+    Object.entries(selections).forEach(([ticketPriceId, quantity]) => {
       if (quantity > 0) {
-        const category = categories.find(c => c.id === categoryId);
-        if (category) {
+        const ticketPrice = ticketPrices.find(c => c.id === +ticketPriceId);
+        if (ticketPrice) {
           addToCart({
             eventId,
             eventTitle,
-            categoryId,
-            categoryName: category.name,
+            ticketPriceId : +ticketPriceId,
+            price_label: ticketPrice.price_label,
             quantity,
-            price: category.price
+            price: ticketPrice.price
           });
         }
       }
@@ -82,9 +100,9 @@ export default function TicketSelector({ eventId, eventTitle, categories }: Tick
       </h2>
 
       <div className="space-y-4">
-        {categories.map((category, index) => (
+        {ticketPrices.map((ticketPrice, index) => (
           <motion.div 
-            key={category.id}
+            key={index}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}
@@ -93,21 +111,21 @@ export default function TicketSelector({ eventId, eventTitle, categories }: Tick
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <motion.div
-                  animate={{ rotate: selections[category.id] > 0 ? 360 : 0 }}
+                  animate={{ rotate: selections[ticketPrice.id] > 0 ? 360 : 0 }}
                   transition={{ duration: 0.5 }}
                 >
                   <Ticket className="h-4 w-4 text-brand-red" />
                 </motion.div>
                 <div>
-                  <h3 className="font-medium text-gray-900">{category.name}</h3>
+                  <h3 className="font-medium text-gray-900">{ticketPrice.price_label}</h3>
                   <p className="text-xs text-gray-500">
-                    {category.available} places disponibles
+                    {event.event_room_capacity} places disponibles
                   </p>
                 </div>
               </div>
-              <p className="text-xs text-gray-600 mb-1">{category.description}</p>
+              <p className="text-xs text-gray-600 mb-1">{ticketPrice.price_label}</p>
               <p className="text-sm font-semibold text-brand-red">
-                {category.price.toLocaleString()} F CFA
+                {ticketPrice.price.toLocaleString()} F CFA
               </p>
             </div>
 
@@ -115,31 +133,31 @@ export default function TicketSelector({ eventId, eventTitle, categories }: Tick
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={() => updateQuantity(category.id, -1)}
+                onClick={() => updateQuantity(ticketPrice.id, -1)}
                 className="p-1 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50"
-                disabled={selections[category.id] === 0}
+                disabled={selections[ticketPrice.id] === 0}
               >
                 <Minus className="h-4 w-4 text-gray-600" />
               </motion.button>
               
               <AnimatePresence mode="wait">
                 <motion.span
-                  key={selections[category.id]}
+                  key={selections[ticketPrice.id] + index}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
                   className="w-5 text-center text-sm font-medium"
                 >
-                  {selections[category.id]}
+                  {selections[ticketPrice.id] || 0}
                 </motion.span>
               </AnimatePresence>
               
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={() => updateQuantity(category.id, 1)}
+                onClick={() => updateQuantity(ticketPrice.id, 1)}
                 className="p-1 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50"
-                disabled={selections[category.id] >= Math.min(10, category.available)}
+                disabled={selections[ticketPrice.id] >= Math.min(10, (+event.event_room_capacity))}
               >
                 <Plus className="h-4 w-4 text-gray-600" />
               </motion.button>

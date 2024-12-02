@@ -11,7 +11,7 @@ interface TicketCategory {
   quantity: string;
 }
 
-export default function PromoterPage() {
+export default function BecomePromoterPage() {
   const [categories, setCategories] = useState<TicketCategory[]>([
     { id: '1', name: '', price: '', description: '', quantity: '' }
   ]);
@@ -105,7 +105,7 @@ export default function PromoterPage() {
                     type="tel"
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand-red/20 focus:border-brand-red"
                     required
-                    placeholder="Ex: 0700000000"
+                    placeholder="Ex: 0759949494"
                   />
                 </div>
               </div>

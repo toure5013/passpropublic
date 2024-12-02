@@ -2,7 +2,7 @@ import create from 'zustand';
 import { persist } from 'zustand/middleware';
 
 interface ViewedEvent {
-  id: string;
+  id: number;
   timestamp: number;
 }
 
@@ -15,9 +15,9 @@ interface UserSession {
 interface SessionStore {
   session: UserSession;
   updateLastVisit: () => void;
-  addViewedEvent: (eventId: string) => void;
+  addViewedEvent: (eventId: number) => void;
   addSearchTerm: (term: string) => void;
-  getRecentlyViewed: () => string[];
+  getRecentlyViewed: () => number[];
 }
 
 export const useSessionStore = create<SessionStore>()(

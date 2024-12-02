@@ -1,36 +1,30 @@
 import axios, { AxiosResponse } from "axios";
-import { configService } from "./config";
+import { configService } from "./configService";
 
 class PaiementService {
   private static readonly baseURL = configService.apiBaseUrl; // Remplacez par votre URL
  // Remplacez par votre URL
 
   // Méthode pour effectuer un cashout
-  static async cashout(
-    userUuid: string,
-    number: string,
-    platform: string,
-    amount: number
-  ): Promise<any> {
+  static async cashout({
+    user_uuid,
+    number_to_debit,
+    platform,
+    amount,
+  } : any ): Promise<any> {
     const formData = new FormData();
-    formData.append("user_uuid", userUuid);
-    formData.append("number_to_debit", number);
+    formData.append("user_uuid", user_uuid);
+    formData.append("number_to_debit", number_to_debit);
     formData.append("platform", platform);
     formData.append("amount", amount.toString());
 
-    console.log({
-      user_uuid: userUuid,
-      number_to_debit: number,
-      platform: platform,
-      amount: amount,
-    });
 
     try {
       const response: AxiosResponse = await axios.post(
         `${this.baseURL}/api/paiement/init`,
         formData
       );
-      console.log("Cashout Response :::", response.data);
+      // console.log("Cashout Response :::", response.data);
       return response.data;
     } catch (error) {
       return this.handleError(error);
@@ -39,15 +33,12 @@ class PaiementService {
 
   // Méthode pour vérifier une transaction
   static async checkTransaction(
-    partnerTransactionId: string
+    externalTransactionId: string
   ): Promise<any> {
-    console.log("Checking Transaction :::", {
-      partnerTransactionId: partnerTransactionId,
-    });
 
     try {
       const response: AxiosResponse = await axios.get(
-        `${this.baseURL}/api/paiement/checkTransactionStatus/${partnerTransactionId}`
+        `${this.baseURL}/api/paiement/checkTransactionStatus/${externalTransactionId}`
       );
       console.log("Transaction Status Response :::", response.data);
       return response.data;

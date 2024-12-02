@@ -6,7 +6,7 @@ interface TicketInfoProps {
   time: string;
   location: string;
   ticketType: string;
-  ticketId: string;
+  ticketId: number;
   price?: string;
 }
 

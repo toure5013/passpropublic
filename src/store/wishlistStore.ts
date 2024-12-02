@@ -1,20 +1,12 @@
 import create from 'zustand';
 import { persist } from 'zustand/middleware';
-
-interface WishlistItem {
-  id: string;
-  title: string;
-  date: string;
-  location: string;
-  image: string;
-  price: string;
-}
+import { MyCustomEvent } from '../utils/eventtypes';
 
 interface WishlistStore {
-  items: WishlistItem[];
-  addToWishlist: (item: WishlistItem) => void;
-  removeFromWishlist: (id: string) => void;
-  isInWishlist: (id: string) => boolean;
+  items: MyCustomEvent[];
+  addToWishlist: (item: MyCustomEvent) => void;
+  removeFromWishlist: (id: number) => void;
+  isInWishlist: (id: number) => boolean;
 }
 
 export const useWishlistStore = create<WishlistStore>()(

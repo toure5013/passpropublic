@@ -7,8 +7,12 @@ interface LogoProps {
 
 export default function Logo({ className = "h-8", style = {} }: LogoProps) {
   return (
+
+    // src="/assets/images/Logo.PNG" 
+
+
     <img 
-      src="https://web.passpro.app/assets/images/pass-pro.png" 
+      src="http://51.77.211.117:8893/assets/images/pass-pro.png" 
       alt="PassPro" 
       className={className}
       style={{ 

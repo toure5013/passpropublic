@@ -27,7 +27,7 @@ export default function Contact() {
               <Mail className="h-5 w-5 text-brand-red flex-shrink-0" />
               <div>
                 <h2 className="text-sm font-semibold text-gray-900">Email</h2>
-                <p className="text-sm text-gray-600">contact@passpro.ci</p>
+                <p className="text-sm text-gray-600">contact@passpro.app</p>
                 <p className="text-xs text-gray-500">Réponse sous 24h</p>
               </div>
             </div>
