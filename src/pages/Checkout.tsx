@@ -37,6 +37,9 @@ export default function Checkout() {
   const [ticketOwnerInfo, setTicketOwnerInfo] = useState(
     userInfo ? userInfo : {}
   );
+  const [otpSentTimer, setOtpSentTimer] = useState(0);
+
+
   const handleTicketOwnerInfoSubmit = async (
     tickerOwnerInfo: TicketOwnerInfoType
   ) => {
@@ -71,6 +74,10 @@ export default function Checkout() {
         // toast.success(response.message);
         toast.success("Code otp envoyé par sms avec succès !");
         setOtpSent(true);
+
+
+      //  decrease the timer here
+      setOtpSentTimer(60);
       } else {
         toast.error(response.message);
       }
@@ -170,6 +177,18 @@ export default function Checkout() {
     }
   }, []);
 
+  useEffect(() => {
+    if (otpSentTimer > 0) {
+      console.log(otpSentTimer);
+      
+      const otpInterval = setInterval(() => {
+        setOtpSentTimer((prevTimer) => prevTimer - 1);
+      }, 1000);
+
+      return () => clearInterval(otpInterval); // Clear the interval on unmount
+    }
+  }, [otpSentTimer]);
+
   return (
     <div className="pt-4 sm:pt-6 pb-20">
       <div className="max-w-lg mx-auto px-3 sm:px-4">
@@ -252,12 +271,14 @@ export default function Checkout() {
                       onKeyDown={handleOtpKeyDown}
                       error={otpError}
                     />
-                    <button
+                    {otpSent && otpSentTimer > 0 ? <p>
+                      Renvoyer le code dans {otpSentTimer} seconde(s)
+                    </p> : <button
                       onClick={() => handleSendOtp()}
                       className="text-sm text-brand-red hover:text-brand-red/80"
                     >
                       Renvoyer le code
-                    </button>
+                    </button>}
                   </div>
                 )}
 

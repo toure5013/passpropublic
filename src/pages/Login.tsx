@@ -29,6 +29,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [otpSent, setOtpSent] = useState(false);
+  const [otpSentTimer, setOtpSentTimer] = useState(0);
 
   const navigate = useNavigate();
 
@@ -40,6 +41,18 @@ export default function Login() {
       navigate("/espace-promoteur");
     }
   }, [isLoggedIn]);
+
+  useEffect(() => {
+    if (otpSentTimer > 0) {
+      console.log(otpSentTimer);
+
+      const otpInterval = setInterval(() => {
+        setOtpSentTimer((prevTimer) => prevTimer - 1);
+      }, 1000);
+
+      return () => clearInterval(otpInterval); // Clear the interval on unmount
+    }
+  }, [otpSentTimer]);
 
   const handleCodeChange = (index: number, value: string) => {
     if (value.length > 1) return;
@@ -66,6 +79,7 @@ export default function Login() {
         toast.success(response.message);
         setError("");
         setOtpSent(true);
+        setOtpSentTimer(60);
       } else {
         toast.error(response.message);
       }
@@ -304,12 +318,16 @@ export default function Login() {
                     error={error}
                   />
 
-                  <button
-                    onClick={() => handleSendOtp()}
-                    className="text-sm mt-3 text-brand-red hover:text-brand-red/80"
-                  >
-                    Renvoyer le code
-                  </button>
+                  {otpSent && otpSentTimer > 0 ? (
+                    <p>Renvoyer le code dans {otpSentTimer} seconde(s)</p>
+                  ) : (
+                    <button
+                      onClick={() => handleSendOtp()}
+                      className="text-sm text-brand-red hover:text-brand-red/80"
+                    >
+                      Renvoyer le code
+                    </button>
+                  )}
                 </div>
               </>
             )}
