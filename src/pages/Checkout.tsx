@@ -68,7 +68,8 @@ export default function Checkout() {
       });
 
       if (response.success) {
-        toast.success(response.message);
+        // toast.success(response.message);
+        toast.success("Code otp envoyé par sms avec succès !");
         setOtpSent(true);
       } else {
         toast.error(response.message);
@@ -113,8 +114,8 @@ export default function Checkout() {
         toast.success(response["message"]);
         setShowConfirmation(false);
 
-        //init payment
-        // await handlePayment();
+        //change by payment screen
+        setCurrentStep("payment");
       } else {
         toast.error(response.message);
       }

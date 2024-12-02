@@ -30,23 +30,24 @@ interface PayementInstructions {
 }
 
 const paymentOptions: PaymentOption[] = [
+  // {
+  //   id: "card",
+  //   name: "Carte bancaire",
+  //   icon: "/assets/images/payments/bank-card.png",
+  //   color: "bg-blue-500",
+  // },
+ 
   {
-    id: "card",
-    name: "Carte bancaire",
-    icon: "/assets/images/payments/bank-card.png",
-    color: "bg-blue-500",
+    id: "orange",
+    name: "Orange Money",
+    icon: "/assets/images/payments/orange.png",
+    color: "bg-[#FF7900]",
   },
   {
     id: "wave",
     name: "Wave",
     icon: "/assets/images/payments/wave.png",
     color: "bg-[#1DC1EC]",
-  },
-  {
-    id: "orange",
-    name: "Orange Money",
-    icon: "/assets/images/payments/orange.png",
-    color: "bg-[#FF7900]",
   },
   {
     id: "mtn",
@@ -72,7 +73,7 @@ export default function PaymentMethod({
   const [isProcessing, setIsProcessing] = useState(false);
   const { setTransaction, setTransactionAllInfo, externalTransactionId } =
     usePayementStore();
-  const { isLoggedIn, userInfo } = useAuthStore();
+  const { userInfo } = useAuthStore();
   const { items } = useCartStore();
   const [paymentStatus, setPaymentStatus] = useState<
     "processing" | "success" | "error" | "ticketgeneration" | null
