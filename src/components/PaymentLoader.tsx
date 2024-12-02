@@ -40,16 +40,21 @@ export default function PaymentLoader({
   orderDetails,
   instructions,
 }: PaymentLoaderProps) {
+
+  
+
+
   const getStatusConfig = () => {
     switch (status) {
       case "processing":
-        return {
+        return { 
           icon: <Loader2 className="h-12 w-12 text-brand-red" />,
-          text: message || "Traitement du paiement en cours...",
-          bgColor: "bg-brand-yellow/10",
-          textColor: "text-brand-red",
-          instruction:
-            "Ne fermez pas cette fenêtre pendant le traitement du paiement.",
+          text: message || `Nous vérifions votre paiement...
+Une fois que votre paiement sera confirmé, vous retrouverez votre commande dans le menu "Mes Tickets"..`, 
+          bgColor: "bg-brand-yellow/10", 
+          textColor: "text-brand-red", 
+          instruction: 
+            "Ne fermez pas cette fenêtre pendant le traitement du paiement.", 
         };
       case "success":
         return {
@@ -119,7 +124,7 @@ export default function PaymentLoader({
           transition={{ delay: 0.2 }}
         >
           <h2
-            className={`text-lg font-semibold ${config.textColor} text-center mb-2`}
+            className={`text-sm font-semibold ${config.textColor} text-center mb-2`}
           >
             {config.text}
           </h2>

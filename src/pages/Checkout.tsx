@@ -90,6 +90,11 @@ export default function Checkout() {
     }
 
     try {
+      console.log("code", {
+        login: ticketOwnerInfo.tel,
+        password: code.join(""),
+      });
+      
       const response: any = await UserService.login({
         login: ticketOwnerInfo.tel,
         password: code.join(""),
@@ -133,6 +138,9 @@ export default function Checkout() {
     const newOtp = [...code];
     newOtp[index] = value;
     setCode(newOtp);
+    console.log("newOtp", newOtp);
+    console.log("Code", code);
+    
     setOtpError("");
 
     if (value && index < 5) {
