@@ -1,4 +1,4 @@
 export const configService = {
-    apiBaseUrl: "https://cors-anywhere.herokuapp.com/http://api.passpro.app:8894",
-    baseUrlImage : "https://api.passpro.app:8894"
+    apiBaseUrl: "https://backoffice.passpro.app",
+    baseUrlImage : "https://backoffice.passpro.app"
 }
