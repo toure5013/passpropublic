@@ -6,99 +6,43 @@ import { useEventStore } from "../store/eventStore";
 import { motion } from "framer-motion";
 import { configService } from "../providers/configService";
 import { MyCustomEvent } from "../utils/eventtypes";
+import EventService from "../providers/eventService";
 
 export default function EventBooking() {
   const { id } = useParams();
   const { getEventById } = useEventStore();
   const [event, setEvent] = React.useState<MyCustomEvent>({} as MyCustomEvent);
+  const [allEvent, setAllEvent] = React.useState<MyCustomEvent[]>([
+    {} as MyCustomEvent,
+  ]);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = React.useState(true);
+  const { updateEvent } = useEventStore();
 
   async function getEventByIdAsync(id: number) {
     setIsLoading(true);
-    const _event:MyCustomEvent = await getEventById(+id);
-    /*
-    {
-  "id": 120,
-  "event_name": "1XEVENTTEST",
-  "event_enterprise_name": "SD",
-  "event_type_id": 1,
-  "description": null,
-  "event_ticket_img": "/event_cover/1XEVENTTEST_cover_2024_10_27_16_27_12.jpg",
-  "event_date": "2024-12-30",
-  "event_cover": "/event_cover/1XEVENTTEST_cover_2024_10_27_16_27_12.jpg",
-  "event_hour": "16:00",
-  "event_place_id": 4,
-  "event_localization": "Palais de la culture",
-  "event_commune": "Treichville",
-  "event_room": "Salle Anoumabo",
-  "event_room_capacity": "4000",
-  "event_longitude": "5.2871032",
-  "event_latitude": "-3.9776399",
-  "payment_online": "true",
-  "payment_on_delivery": "false",
-  "ticket_physic": "false",
-  "ticket_virtual": "true",
-  "observation": null,
-  "recommandation": null,
-  "status": 1,
-  "created_at": "2024-10-25T18:38:33.000000Z",
-  "updated_at": "2024-10-27T16:27:12.000000Z",
-  "ticket_prices": [
-    {
-      "id": 185,
-      "event_id": 120,
-      "price_label": "pauvre",
-      "price": 100
-    },
-    {
-      "id": 181,
-      "event_id": 120,
-      "price_label": "PASS",
-      "price": 200
-    },
-    {
-      "id": 182,
-      "event_id": 120,
-      "price_label": "VIP",
-      "price": 300
-    },
-    {
-      "id": 183,
-      "event_id": 120,
-      "price_label": "VVIP",
-      "price": 500
+    const _event: MyCustomEvent = await getEventById(+id);
+
+    if (_event) {
+      setEvent(_event);
+      setIsLoading(false);
+      return;
     }
-  ],
-  "event_type": {
-    "id": 1,
-    "name": "Concert"
-  },
-  "event_place": {
-    "id": 4,
-    "district_id": 9,
-    "place": "Palais de la culture",
-    "description": null,
-    "longitude": "5.2871032",
-    "latitude": "-3.9776399",
-    "map_link": "https://www.google.com/maps/dir//palais+de+la+culture/data=!4m6!4m5!1m1!4e2!1m2!1m1!1s0xfc1ebc3ed8a44d1:0x75aed55330be96b9?sa=X&ved=2ahUKEwiosLGV8Kz9AhX6SfEDHWSuDw0Q9Rd6BQiAARAE",
-    "created_at": "2023-02-24T00:14:51.000000Z",
-    "updated_at": "2023-03-05T18:28:23.000000Z"
-  }
-}
-    
-    */
-    console.log(_event);
-    setEvent(_event);
+    try {
+      const response = await EventService.getAllEvents();
+      if (response.status === 200) {
+        localStorage.setItem("allEvents", JSON.stringify(response.data || []));
+        updateEvent(response.data || []);
+        setAllEvent(response.data || []);
+        const _event: MyCustomEvent = await getEventById(+id);
+        if (_event) {
+          setEvent(_event);
+          setIsLoading(false);
+        }
+      }
+    } catch (error) {}
   }
 
-  //if current event is null redirect to home
-  useEffect(() => {
-    if (id) {
-      console.log(+id);
-      getEventByIdAsync(+id);
-    }
-  }, [id]);
 
   useEffect(() => {
     if (id) {
@@ -112,7 +56,6 @@ export default function EventBooking() {
     console.log("Sélections:", selections);
   };
 
-  
   return (
     <>
       {event ? (
@@ -158,13 +101,13 @@ export default function EventBooking() {
             </div>
 
             {/* Sélecteur de tickets */}
-          
-             <TicketSelector
-             event={event}
+
+            <TicketSelector
+              event={event}
               eventId={event.id}
               eventTitle={event.event_name}
               ticketPrices={event.ticket_prices ? event.ticket_prices : []}
-            /> 
+            />
           </div>
         </div>
       ) : (
