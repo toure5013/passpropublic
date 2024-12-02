@@ -11,6 +11,7 @@ import CodeInput from "../CodeInput";
 import PaymentLoader from "../PaymentLoader";
 import { useCartStore } from "../../store/cartStore";
 import TicketService from "../../providers/ticketService";
+import { a } from "framer-motion/client";
 
 interface PaymentMethodProps {
   amount: number;
@@ -100,7 +101,9 @@ export default function PaymentMethod({
         tel: ticketOwnerInfo.tel,
         name: ticketOwnerInfo.name ? ticketOwnerInfo.name : "",
         password: ticketOwnerInfo.password ? ticketOwnerInfo.password : "",
-        c_password: ticketOwnerInfo.c_password ? ticketOwnerInfo.c_password : "",
+        c_password: ticketOwnerInfo.c_password
+          ? ticketOwnerInfo.c_password
+          : "",
         surname: ticketOwnerInfo.surname ? ticketOwnerInfo.surname : "",
       });
 
@@ -190,14 +193,6 @@ export default function PaymentMethod({
   // GENERATE USET TICKET
   const buyTickets = async () => {
     for (let i = 0; i < items.length; i++) {
-      console.log({
-        event_id: items[i].eventId,
-        tel: ticketOwnerInfo.tel,
-        event_ticket_price_id: items[i].ticketPriceId,
-        quantity: items[i].quantity,
-        user_uuid: userInfo.uuid,
-      });
-
       try {
         const response: any = await TicketService.buyTicket({
           user_uuid: userInfo.uuid,
@@ -222,12 +217,15 @@ export default function PaymentMethod({
           },
         });
 
+        console.log(">>>>>>>>>> ---- CREATE TICKET response >>>>>>>>>> ---- ");
         console.log(response);
 
         if (response.success) {
           console.log(response.message);
         }
       } catch (error) {
+        console.log(">>>>>>>>>> ---- CREATE error response >>>>>>>>>> ---- ");
+
         console.log(error);
       }
     }
@@ -264,7 +262,6 @@ export default function PaymentMethod({
       }
 
       if (response.success) {
-        console.log(response.data.data._be_removed_deepLinkUrl_);
         setIsProcessing(false);
 
         // Get the URL and transaction data
@@ -326,7 +323,7 @@ export default function PaymentMethod({
         setPaymentStatus("processing");
 
         // Activate payement checker
-        await payementCheckerTimer();
+        payementCheckerTimer(5000);
       } else {
         setIsProcessing(false);
         toast.error(response.message);
@@ -344,6 +341,16 @@ export default function PaymentMethod({
   };
 
   const payementStatusChecker = async () => {
+    console.log("TRANSACTION INFORMATIONS");
+
+    console.log(
+      `${
+        transactionLocalInformation.externalTransactionId
+          ? transactionLocalInformation.externalTransactionId
+          : externalTransactionId
+      }`
+    );
+
     try {
       const response = await PaiementService.checkTransaction(
         `${
@@ -354,8 +361,6 @@ export default function PaymentMethod({
         // "19620241201201320674cc3606edda"
       );
       const paymentData = response.data ? response.data : {};
-
-      console.log(paymentData);
 
       if (!paymentData) {
         return;
@@ -380,9 +385,6 @@ export default function PaymentMethod({
         paymentData.status === "PENDING" ||
         paymentData.status === "PROCESSING"
       ) {
-        console.log(
-          "Le paiement est en cours de traitement. Veuillez patienter."
-        );
         setErrorMessage(
           "Le paiement est en cours de traitement. Veuillez patienter."
         );
@@ -393,6 +395,7 @@ export default function PaymentMethod({
         );
       }
     } catch (error) {
+      console.log("=========>>>>>>> PAYEMENT ERROR <<<<<=========");
       console.log(error);
       console.error("Erreur lors de la vérification du paiement:", error);
       setErrorMessage(
@@ -401,31 +404,37 @@ export default function PaymentMethod({
     }
   };
 
-  async function payementCheckerTimer(seconds = 5000) {
-    // Initialize the timer
+  async function payementCheckerTimer(interval = 5000) {
+    console.log("interval", interval);
+    
     try {
-      timerRef.current = setTimeout(() => {
+      // Clear any existing timers to avoid duplicates
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+  
+      // Start a new interval
+      timerRef.current = setInterval(() => {
         setAttemptCount((prev) => prev + 1);
-        payementStatusChecker();
-      }, seconds);
-    } catch (error) {}
-  }
-
-  const handleVisibilityChange = () => {
-    if (document.visibilityState === "hidden" && timerRef.current) {
-      clearTimeout(timerRef.current); // Clear the timer if the page becomes hidden
-      timerRef.current = null;
+        if (transactionLocalInformation._be_removed_deepLinkUrl_) {
+          payementStatusChecker();
+        }
+      }, interval);
+    } catch (error) {
+      console.log("==>>>>>>> Timer error <<<<<===");
+      console.error(error);
     }
-  };
+  }
+  
 
   useEffect(() => {
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      if (timerRef.current) clearTimeout(timerRef.current); // Clean up the timer
-    };
-  }, []);
-
+    // Start the payment checker only if transaction information exists
+    if (transactionLocalInformation && transactionLocalInformation._be_removed_deepLinkUrl_) {
+      payementStatusChecker();
+    }
+  
+  }, [transactionLocalInformation, attemptCount]); // Depend only on transactionLocalInformation
+  
   return (
     <div>
       <div className="mb-6">

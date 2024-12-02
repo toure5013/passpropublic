@@ -13,12 +13,15 @@ import { sanitizeWaveUrlBasedOnDevice } from "../utils/paymentUtils";
 interface PayementInstructions {
   description: string;
   deepLink?: string;
+  externalTransactionId? : string;
+  _be_removed_deepLinkUrl_? : string;
   redirectUrl?: string;
 }
 interface PaymentLoaderProps {
   status: "processing" | "success" | "error" | "ticketgeneration";
   message?: string;
   instructions?: PayementInstructions;
+
   orderDetails?: {
     amount: number;
     paymentMethod: string;
@@ -176,6 +179,10 @@ export default function PaymentLoader({
               />
             </div>
           )}
+
+          <div className="text-sm text-gray-600 text-center mt-6">
+            {instructions &&instructions.externalTransactionId}
+          </div>
         </motion.div>
       </motion.div>
     </div>

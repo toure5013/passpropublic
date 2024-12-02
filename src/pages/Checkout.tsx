@@ -47,7 +47,7 @@ export default function Checkout() {
         toast.error(response.message);
       }
     } catch (error: any) {
-      console.log(error);
+      console.log(">>>>>>>>>>>>>>=== createUser eror =====<<<<<<<<<<<<<");
       setIsLoading(true);
       toast.error(error.message);
     }
@@ -66,6 +66,7 @@ export default function Checkout() {
     return;
   };
 
+
   const searchUserByPhoneAndCreate = async (
     tickerOwnerInfo: TicketOwnerInfoType
   ) => {
@@ -73,8 +74,6 @@ export default function Checkout() {
       const response: any = await UserService.searchUserByPhoneNumber(
         tickerOwnerInfo.tel
       );
-
-      console.log(response);
 
       if (response.success) {
         // user exists, set userinfo in the state
