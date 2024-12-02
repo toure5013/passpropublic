@@ -37,10 +37,7 @@ export default function Navbar() {
                 />
               </Link>
             ) : (
-              <Link
-                to="/"
-                className="flex items-center"
-              >
+              <Link to="/" className="flex items-center">
                 <Logo
                   className="h-6 sm:h-8 w-auto"
                   style={{ minWidth: "160px" }}
@@ -74,32 +71,42 @@ export default function Navbar() {
                         exit={{ opacity: 0, y: 10 }}
                         className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 border"
                       >
-                        {userInfo?.user_type === "promoter" && (
-                          <Link
-                            to="/espace-promoteur"
-                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                            onClick={() => setShowDropdown(false)}
-                          >
-                            <User className="h-4 w-4" />
-                            Espace promoteur
-                          </Link>
+                        {userInfo?.type == "promoter" ||
+                          userInfo?.type == "admin" ||
+                          (userInfo?.type == "event_manager" && (
+                            <Link
+                              to="/espace-promoteur"
+                              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              onClick={() => setShowDropdown(false)}
+                            >
+                              <User className="h-4 w-4" />
+                              Espace promoteur
+                            </Link>
+                          ))}
+
+                        {userInfo?.type == "promoter" ||
+                        userInfo?.type == "admin" ||
+                        userInfo?.type == "event_manager" ? null : (
+                          <>
+                            <Link
+                              to="/tickets"
+                              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              onClick={() => setShowDropdown(false)}
+                            >
+                              <Ticket className="h-4 w-4" />
+                              Mes tickets
+                            </Link>
+                            <Link
+                              to="/wishlist"
+                              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              onClick={() => setShowDropdown(false)}
+                            >
+                              <Heart className="h-4 w-4" />
+                              Favoris
+                            </Link>
+                          </>
                         )}
-                        <Link
-                          to="/tickets"
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                          onClick={() => setShowDropdown(false)}
-                        >
-                          <Ticket className="h-4 w-4" />
-                          Mes tickets
-                        </Link>
-                        <Link
-                          to="/wishlist"
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                          onClick={() => setShowDropdown(false)}
-                        >
-                          <Heart className="h-4 w-4" />
-                          Favoris
-                        </Link>
+
                         <button
                           onClick={() => {
                             setShowDropdown(false);
