@@ -78,7 +78,6 @@ export default function Home() {
   const trendingEvents = events.filter((event) => event.trending);
   const { userInfo, isLoggedIn } = useAuthStore();
 
-
   //API CALLS
   // Function to search events based on the search key
   const searchEvents = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,12 +113,9 @@ export default function Home() {
       const response = await EventService.getAllEvents();
 
       if (response.status === 200) {
-          localStorage.setItem(
-            "allEvents",
-            JSON.stringify(response.data || [])
-          );
-          updateEvent(response.data || []);
-          setEvents(response.data || []);
+        localStorage.setItem("allEvents", JSON.stringify(response.data || []));
+        updateEvent(response.data || []);
+        setEvents(response.data || []);
       } else {
         setError("Failed to load event types");
       }
@@ -187,12 +183,18 @@ export default function Home() {
 
   // Optionally, call the API when the component mounts
   useEffect(() => {
-    if((userInfo.type == "promoter" || userInfo.type == "admin" || userInfo.type == "event_manager") && isLoggedIn ){
-      navigate("/espace-promoteur");
-      return;
+    if (userInfo) {
+      if (
+        (userInfo.type == "promoter" ||
+          userInfo.type == "admin" ||
+          userInfo.type == "event_manager") &&
+        isLoggedIn
+      ) {
+        navigate("/espace-promoteur");
+        return;
+      }
     }
-      getEventTypesWithFirstEvents(); // Call to get event types and first events
-
+    getEventTypesWithFirstEvents(); // Call to get event types and first events
   }, []); // Empty array ensures it only runs on component mount
 
   return (
