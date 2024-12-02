@@ -183,6 +183,17 @@ export default function Home() {
 
   // Optionally, call the API when the component mounts
   useEffect(() => {
+    try {
+      //  UPDATE ICON
+      let link: any = document.querySelector("link[rel~='icon']");
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "icon";
+        document.getElementsByTagName("head")[0].appendChild(link);
+      }
+      let image = "http://51.77.211.117:8893/assets/images/pass-pro.png";
+      link.href = image;
+    } catch (error) {}
     if (userInfo) {
       if (
         (userInfo.type == "promoter" ||

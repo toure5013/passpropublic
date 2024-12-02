@@ -8,6 +8,7 @@ import { MyCustomEvent } from '../utils/eventtypes';
 import { useEventStore } from '../store/eventStore';
 import { configService } from '../providers/configService';
 import CartTimer from '../components/CartTimer';
+import { toast } from 'react-toastify';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -108,9 +109,9 @@ export default function Cart() {
               >
                 <div className="flex gap-2 p-2 sm:p-3">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-lg overflow-hidden">
-                    {getEventByIdAsync ? <ImageLoader
-                       src={configService.baseUrlImage + getEventByIdAsync(item.eventId).event_ticket_img}
-                       alt={getEventByIdAsync(item.eventId).event_name}
+                    {item ? <ImageLoader
+                       src={configService.baseUrlImage + item.event_ticket_img}
+                       alt={item.eventTitle}
                       className="w-full h-full object-cover"
                     /> : ''}
                   </div>
@@ -257,12 +258,31 @@ export default function Cart() {
               </span>
             </label>
             
-            <Link 
-              to="/checkout"
-              className="block w-full text-center bg-brand-button rounded-brand text-white py-2.5 text-sm font-medium hover:opacity-90 transition-opacity"
-            >
-              Procéder au paiement
-            </Link>
+            <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => {
+                  if (!acceptTerms) {
+                    toast.error("Veuillez accepter les conditions d'utilisation", {
+                      autoClose: 1000,
+                      hideProgressBar: false,
+                      closeOnClick: true,
+                      pauseOnHover: true,
+                      draggable: true,
+                      progress: undefined,
+                      theme: "light",
+                    });
+                    return
+                  }
+
+                  navigate("/checkout")
+                }}
+                className="block w-full text-center bg-brand-button rounded-brand text-white py-2.5 text-sm font-medium hover:opacity-90 transition-opacity"
+                // disabled={!acceptTerms}
+              >
+                Procéder au paiement
+              </motion.button>
+              
           </div>
         </motion.div>
       </div>

@@ -8,7 +8,6 @@ import MobileNav from "./components/MobileNav";
 import CheckoutProgress from "./components/CheckoutProgress";
 import PageTransition from "./components/PageTransition";
 import Home from "./pages/Home";
-import EventDetails from "./pages/EventDetails";
 import EventBooking from "./pages/EventBooking";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
@@ -96,7 +95,6 @@ function AppContent() {
                 <Routes location={location}>
                   <Route path="/" element={<Home />} />
                   <Route path="/home" element={<Home />} />
-                  <Route path="/event/:id" element={<EventDetails />} />
                   <Route path="/event/:id/booking" element={<EventBooking />} />
                   <Route path="/paiement/init" element={<PaymentIframe />} />
                   <Route path="/wishlist" element={<Wishlist />} />

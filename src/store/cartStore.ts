@@ -8,6 +8,7 @@ interface CartItem {
   price_label: string;
   quantity: number;
   price: number;
+  event_ticket_img : string
 }
 
 interface CartStore {

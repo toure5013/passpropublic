@@ -79,7 +79,8 @@ export default function TicketSelector({ event , eventId, eventTitle, ticketPric
             ticketPriceId : +ticketPriceId,
             price_label: ticketPrice.price_label,
             quantity,
-            price: ticketPrice.price
+            price: ticketPrice.price,
+            event_ticket_img : event.event_ticket_img ? event.event_ticket_img : ''
           });
         }
       }
@@ -116,12 +117,12 @@ export default function TicketSelector({ event , eventId, eventTitle, ticketPric
                 >
                   <Ticket className="h-4 w-4 text-brand-red" />
                 </motion.div>
-                <div>
+                {/* <div>
                   <h3 className="font-medium text-gray-900">{ticketPrice.price_label}</h3>
                   <p className="text-xs text-gray-500">
                     {event.event_room_capacity} places disponibles
                   </p>
-                </div>
+                </div> */}
               </div>
               <p className="text-xs text-gray-600 mb-1">{ticketPrice.price_label}</p>
               <p className="text-sm font-semibold text-brand-red">

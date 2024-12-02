@@ -19,6 +19,7 @@ export default function EventBooking() {
   const [isLoading, setIsLoading] = React.useState(true);
   const { updateEvent } = useEventStore();
 
+
   async function getEventByIdAsync(id: number) {
     setIsLoading(true);
     const _event: MyCustomEvent = await getEventById(+id);
@@ -43,13 +44,23 @@ export default function EventBooking() {
     } catch (error) {}
   }
 
-
   useEffect(() => {
     if (id) {
-      console.log(+id);
       getEventByIdAsync(+id);
     }
   }, []);
+
+  useEffect(() => {
+    console.log("performance +++++ ")
+    document.title = `${event.event_name} - PassPro` || "Réservation de tickets";
+    let link: any = document.querySelector("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "icon";
+      document.getElementsByTagName("head")[0].appendChild(link);
+    }
+    link.href = `${configService.baseUrlImage}${event.event_ticket_img}`;
+  }, [ event]);
 
   const handleAddToCart = (selections: Record<string, number>) => {
     // Ajouter au panier
