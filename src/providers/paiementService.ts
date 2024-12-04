@@ -11,12 +11,20 @@ class PaiementService {
     number_to_debit,
     platform,
     amount,
-  } : any ): Promise<any> {
+    raw_data,
+  }: {
+    user_uuid: string;
+    number_to_debit: string;
+    platform: string;
+    amount: number;
+    raw_data: any;
+  }  ): Promise<any> {
     const formData = new FormData();
     formData.append("user_uuid", user_uuid);
     formData.append("number_to_debit", number_to_debit);
     formData.append("platform", platform);
     formData.append("amount", amount.toString());
+    formData.append("raw_data", JSON.stringify(raw_data));
 
 
     try {
@@ -96,7 +104,7 @@ class PaiementService {
 
     try {
       const response: AxiosResponse = await axios.get(
-        `${this.baseURL}/api/users/cart/transaction/${externalTransactionId}`
+        `${this.baseURL}/api/users/cart/${externalTransactionId}`
       );
       console.log("Transaction Status Response :::", response.data);
       return response.data;

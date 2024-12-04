@@ -73,8 +73,7 @@ export default function PaymentMethod({
     {} as PaymentOption
   );
   const [isProcessing, setIsProcessing] = useState(false);
-  const { setTransaction, setTransactionAllInfo } =
-    usePayementStore();
+  const { setTransaction, setTransactionAllInfo } = usePayementStore();
   const { userInfo } = useAuthStore();
   const { items } = useCartStore();
   const [paymentStatus, setPaymentStatus] = useState<
@@ -94,29 +93,18 @@ export default function PaymentMethod({
     setIsProcessing(true);
 
     try {
-      const response = await PaiementService.cashout({
-        user_uuid: userInfo.uuid,
-        number_to_debit: payment_number,
-        platform: selectedMethod.id,
-        amount: amount,
-        raw_data: items,
-      });
+      const payload = {
+        "user_uuid": userInfo.uuid,
+        "number_to_debit": payment_number,
+        "platform": selectedMethod.id,
+        "amount": amount,
+        "raw_data": items,
+      };
+      const response = await PaiementService.cashout(payload);
 
-      console.log({
-        user_uuid: userInfo.uuid,
-        number_to_debit: payment_number,
-        platform: selectedMethod.id,
-        amount: amount,
-        raw_data: items,
-      });
+      console.log("payload", payload);
 
       console.log(response);
-
-      if (!response.success) {
-        toast.error(response.message);
-        setIsProcessing(false);
-        return;
-      }
 
       if (response.success) {
         setIsProcessing(false);
@@ -268,7 +256,7 @@ export default function PaymentMethod({
 
         <motion.button
           onClick={handlePayment}
-          disabled={!selectedMethod || isProcessing}
+          disabled={!selectedMethod.id || isProcessing}
           className="w-full py-3 bg-brand-button text-white rounded-brand text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}

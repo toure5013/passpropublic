@@ -131,6 +131,64 @@ class TicketService {
       throw error.response || error; // Re-throw for the caller to handle
     }
   }
+
+
+  /**
+   * Update user's cart
+   * @param tel User's phone number
+   * @param cartData Cart data to update
+   */
+  static async updateUserCart(
+    tel: string,
+    cartData: Record<string, any>
+  ): Promise<AxiosResponse> {
+    try {
+      const response = await axios.put(
+        `${this.baseURL}/api/users/cart/${tel}`,
+        cartData
+      );
+      return response;
+    } catch (error: any) {
+      console.error("Error updating cart: ", error?.response?.data);
+      return error.response;
+    }
+  }
+
+  /**
+   * Delete a specific cart item
+   * @param tel User's phone number
+   * @param id Cart ID
+   */
+  static async deleteCartItem(
+    tel: string,
+    id: number
+  ): Promise<AxiosResponse> {
+    try {
+      const response = await axios.delete(
+        `${this.baseURL}/api/users/cart/${tel}/${id}`
+      );
+      return response;
+    } catch (error: any) {
+      console.error("Error deleting cart item: ", error?.response?.data);
+      return error.response;
+    }
+  }
+
+  /**
+   * Get all carts for a user by phone number
+   * @param tel User's phone number
+   */
+  static async getUserCarts(tel: string): Promise<AxiosResponse> {
+    try {
+      const response = await axios.get(
+        `${this.baseURL}/api/users/cart/${tel}`
+      );
+      return response;
+    } catch (error: any) {
+      console.error("Error fetching user carts: ", error?.response?.data);
+      return error.response;
+    }
+  }
 }
 
 export default TicketService;
