@@ -140,9 +140,11 @@ export default function PaymentLoader({
           {config.isBouttonActive && (
             <motion.button
               onClick={() => {
-                if (instructions.deepLink) {
+                console.log(instructions);
+                
+                if (instructions.redirectUrl) {
                   window.open(
-                    sanitizeWaveUrlBasedOnDevice(instructions.deepLink),
+                    sanitizeWaveUrlBasedOnDevice(instructions.redirectUrl),
                     "_blank"
                   );
                 }

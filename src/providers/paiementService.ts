@@ -47,6 +47,8 @@ class PaiementService {
     }
   }
 
+  
+
   // Méthode pour obtenir les historiques
   static async getHistoriques(userUuid: string): Promise<AxiosResponse> {
     try {
@@ -85,6 +87,24 @@ class PaiementService {
       throw new Error("An unknown error occurred.");
     }
   }
+
+
+  // Méthode pour vérifier une transaction
+  static async getOrderMetaDataByTransactionID(
+    externalTransactionId: string
+  ): Promise<any> {
+
+    try {
+      const response: AxiosResponse = await axios.get(
+        `${this.baseURL}/api/users/cart/transaction/${externalTransactionId}`
+      );
+      console.log("Transaction Status Response :::", response.data);
+      return response.data;
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
 }
 
 export default PaiementService;
