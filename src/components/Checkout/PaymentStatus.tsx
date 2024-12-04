@@ -161,6 +161,8 @@ export default function PaymentStatus() {
         paymentData.status == "PROCESSING"
       ) {
         setPaymentStatus("processing");
+        console.log("En cours de traitement, le panier n'est pas encore payer...");
+        
         orderCheckerTimer();
       } else if (
         paymentData.status === "FAIL" ||
