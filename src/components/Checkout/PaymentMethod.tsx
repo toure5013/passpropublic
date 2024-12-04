@@ -146,6 +146,7 @@ export default function PaymentMethod({
         number_to_debit: payment_number,
         platform: selectedMethod,
         amount: amount,
+        items : items
       });
 
       console.log(response);
