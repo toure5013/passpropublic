@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { Calendar, MapPin, Clock, Users, Share2 } from "lucide-react";
+import {  useNavigate, useParams } from "react-router-dom";
+import { Calendar, MapPin, Clock, Share2 } from "lucide-react";
 import TicketSelector from "../components/Booking/TicketSelector";
 import { useEventStore } from "../store/eventStore";
 import { motion } from "framer-motion";

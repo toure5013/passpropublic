@@ -8,6 +8,7 @@ import PaiementService from "../../providers/paiementService";
 import { AnimatePresence, motion } from "framer-motion";
 import PaymentLoader from "../PaymentLoader";
 import ModalLoader from "../ModalLoader";
+import UserService from '../../providers/userServices';
 
 interface PayementInstructions {
   id: string;
@@ -22,14 +23,13 @@ export default function PaymentStatus() {
   const navigate = useNavigate();
 
   // payement status checker
-  const [errorMessage, setErrorMessage] = useState("");
   const [attemptCount, setAttemptCount] = useState(0); // Track the number of attempts
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { userInfo } = useAuthStore();
+//   const { userInfo } = useAuthStore();
   const [items, setItems] = useState<any>([]);
-  const [transactionLocalInformation, setTransactionLocalInformation] =
-    useState({} as any);
   const [externalTransactionId, setExternalTransactionId] = useState("");
+  const [ticketOwnerInfo, setTicketOwnerInfo] = useState<any>({});
+  
   const [paymentStatus, setPaymentStatus] = useState<
     "processing" | "success" | "error" | "ticketgeneration" | null
   >(null);
@@ -39,25 +39,19 @@ export default function PaymentStatus() {
     for (let i = 0; i < items.length; i++) {
       try {
         const response: any = await TicketService.buyTicket({
-          user_uuid: userInfo.uuid,
-          nom: userInfo.name,
-          prenoms: userInfo.surname,
-          tel: userInfo.tel,
+          user_uuid: ticketOwnerInfo.uuid,
+          nom: ticketOwnerInfo.name,
+          prenoms: ticketOwnerInfo.surname,
+          tel: ticketOwnerInfo.tel,
           event_id: items[i].id,
           event_ticket_price_id: items[i].ticketPriceId,
           is_for_me: true,
           payment_type: items[i].payment_online ? "online" : "on_delivery",
           ticket_type: items[i].ticket_virtual ? "virtual" : "physic",
           ticket_owner_info: {
-            nom: items[i].ticketOwnerInfo.name
-              ? items[i].ticketOwnerInfo.name
-              : userInfo.name,
-            prenoms: items[i].ticketOwnerInfo.surname
-              ? items[i].ticketOwnerInfo.surname
-              : userInfo.surname,
-            tel: items[i].ticketOwnerInfo.tel
-              ? items[i].ticketOwnerInfo.tel
-              : userInfo.tel,
+            nom: ticketOwnerInfo.name,
+            prenoms: ticketOwnerInfo.surname,
+            tel: ticketOwnerInfo.tel,
           },
           delivery_information: {
             district_id: 1,
@@ -79,7 +73,7 @@ export default function PaymentStatus() {
     }
   };
 
-  async function orderCheckerTimer(interval = 5000) {
+  async function orderCheckerTimer(interval = 10000) {
     try {
       // Clear any existing timers to avoid duplicates
       if (timerRef.current) {
@@ -96,6 +90,22 @@ export default function PaymentStatus() {
       console.error(error);
     }
   }
+
+
+  async function getUserByPhoneNumber(phoneNumber: string): Promise<any> {
+    try {
+      const response:any = await UserService.searchUserByPhoneNumber(phoneNumber);
+
+      if(response.success){
+        return response.user
+      }else {
+        return null
+      }
+    } catch (error) {
+      console.error("Error fetching user by phone number:", error);
+      return null;
+  }
+}   
 
   async function getOrderMetaData(): Promise<void> {
     try {
@@ -114,7 +124,7 @@ export default function PaymentStatus() {
 
       if (
         paymentData.status === "SUCCESS" ||
-        paymentData.status === "SUCCESSFUL" || paymentData.status === "PAID"
+        paymentData.status === "SUCCESSFUL" || paymentData.status === "PAID" || true
       ) {
         // Parse raw_data into JSON if it exists
         if (paymentData.raw_data) {
@@ -133,17 +143,35 @@ export default function PaymentStatus() {
         setPaymentStatus("ticketgeneration");
         setItems(paymentData.raw_data || []); // Assuming raw_data contains the ticket items
 
+        // Get uset all information by
+        const ticketOwnerInfo = await getUserByPhoneNumber(
+            paymentData.user_tel,
+        )
+
+        setTicketOwnerInfo(ticketOwnerInfo ? ticketOwnerInfo : {});
+
+
+        console.log("Ticket owner info:", ticketOwnerInfo);
+        
+
         // Generate tickets
-        await buyTickets();
+        //await buyTickets();
 
         // CHANGE CART REMOTE STATUS
-
+        console.log("PAYLAOD", {
+            ...paymentData,
+            status: "COMPLETED",
+        });
+        
         try {
-          const deleteCartResponse = await TicketService.deleteCartItem(
-            paymentData.raw_data[0].user_tel,
-            paymentData.raw_data[0].id
+          const updateCartResponse = await TicketService.updateUserCart(
+            paymentData.user_tel,
+            {
+                ...paymentData,
+                status: "COMPLETED",
+            }
           );
-          console.log(deleteCartResponse);
+          console.log("updateCartResponse", updateCartResponse);
           
         } catch (error) {
           console.error("Error deleting cart item:", error);

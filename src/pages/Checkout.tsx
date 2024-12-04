@@ -25,7 +25,7 @@ export default function Checkout() {
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { getFinalTotal } = useCartStore();
+  const { getFinalTotal , updateAllItemsOwnerInformation} = useCartStore();
   // OTP
   const [otpSent, setOtpSent] = useState(false);
   const [code, setCode] = useState(["", "", "", "", "", ""]);
@@ -43,11 +43,17 @@ export default function Checkout() {
   const handleTicketOwnerInfoSubmit = async (
     tickerOwnerInfo: TicketOwnerInfoType
   ) => {
+
     setTicketOwnerInfo({
       tel: tickerOwnerInfo.tel,
       name: tickerOwnerInfo.name,
       surname: tickerOwnerInfo.surname,
     });
+
+    // update all cart items by adding user info
+    updateUserInfo(tickerOwnerInfo,);
+
+    updateAllItemsOwnerInformation(tickerOwnerInfo);
 
     // is not logged in
     if (!isLoggedIn) {

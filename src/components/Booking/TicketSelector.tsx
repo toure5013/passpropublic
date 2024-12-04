@@ -12,11 +12,18 @@ interface TicketSelectorProps {
   event: MyCustomEvent;
   eventId: number;
   eventTitle: string;
+  ticketOwnerInfo?: {
+    name : string;
+    surname : string;
+    tel : string
+    uuid : string
+  };
   ticketPrices: MyCustomEventTicketPrice[];
 }
 
 export default function TicketSelector({
   event,
+  ticketOwnerInfo,
   ticketPrices,
 }: TicketSelectorProps) {
   const navigate = useNavigate();
@@ -111,6 +118,7 @@ export default function TicketSelector({
             ticket_physic: event.ticket_physic ? event.ticket_physic :  "",
             ticket_virtual: event.ticket_virtual ? event.ticket_virtual : "",
             observation: event.observation,
+            ticketOwnerInfo: ticketOwnerInfo
           });
         }
       }

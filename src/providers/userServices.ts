@@ -87,6 +87,7 @@ class UserService {
     }
   }
 
+
   static async searchUserByPhoneNumber(phoneNumber: string): Promise<ApiResponse> {
     try {
       const response: AxiosResponse<ApiResponse> = await axios.get(

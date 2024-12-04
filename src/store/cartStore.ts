@@ -13,7 +13,6 @@ export type CartItem = {
   payment_on_delivery: string;
   ticket_physic: string;
   ticket_virtual: string;
-
   event_enterprise_name?: string;
   event_type_id?: number;
   description?: string | null;
@@ -28,7 +27,6 @@ export type CartItem = {
   event_room_capacity: string;
   event_longitude?: string;
   event_latitude?: string;
-
   observation?: string | null;
   recommandation?: string | null;
   status?: number;
@@ -36,6 +34,12 @@ export type CartItem = {
   updated_at?: string;
   event_type?: MyCustomEventType;
   event_place?: MyCustomEventPlace;
+  ticketOwnerInfo? : {
+    name: string;
+    surname: string;
+    tel: string;
+    uuid: string
+  }
 };
 
 
@@ -45,6 +49,7 @@ interface CartStore {
   promoDiscount: number;
   acceptTerms: boolean;
   addToCart: (item: CartItem) => void;
+  updateAllItemsOwnerInformation: (ticketOwnerInfo: any) => void;
   addOneToCartMutiple: (item: CartItem) => void;
   removeFromCart: (eventId: number, ticketPriceId: number) => void;
   updateQuantity: (
@@ -99,6 +104,20 @@ export const useCartStore = create<CartStore>()(
           }
 
           return { ...state, items: [...state.items, item] };
+        });
+      },
+
+      updateAllItemsOwnerInformation: (ticketOwnerInfo) => {
+        set((state) => {
+          return {
+            ...state,
+            items: state.items.map((item) => {
+              return {
+                ...item,
+                ticketOwnerInfo
+              };
+            }),
+          };
         });
       },
 

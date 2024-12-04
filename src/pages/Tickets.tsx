@@ -5,20 +5,20 @@ import TicketService from "../providers/ticketService";
 import { MyCustomTicket } from "../utils/tickettypes";
 import { useTicketStore } from "../store/ticketStore";
 import useAuthStore from "../store/loginStore";
+import { formatDate } from "../utils/paymentUtils";
 
 export default function Tickets() {
-  
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { isLoggedIn, userInfo } = useAuthStore();
 
   //useTicketStore
-  const { updateAllTickets,} = useTicketStore()
+  const { updateAllTickets } = useTicketStore();
 
   const [tickets, setTickets] = React.useState<MyCustomTicket[]>(
     [] as MyCustomTicket[]
   );
 
-  const getMyTicketsAsync = async ( eventTypeId?: number) => {
+  const getMyTicketsAsync = async (eventTypeId?: number) => {
     setIsLoading(true);
 
     try {
@@ -43,10 +43,9 @@ export default function Tickets() {
     }
   };
 
- 
   useEffect(() => {
-    if(isLoggedIn){
-      getMyTicketsAsync(userInfo.userUuid,);
+    if (isLoggedIn) {
+      getMyTicketsAsync(userInfo.userUuid);
     }
   }, []);
 
@@ -87,7 +86,6 @@ export default function Tickets() {
     );
   }
 
-
   return (
     <div className="pt-4 sm:pt-6">
       <div className="max-w-lg mx-auto px-3 sm:px-4">
@@ -122,11 +120,18 @@ export default function Tickets() {
               </div>
 
               <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-100">
-                <div className="flex items-center text-gray-500">
-                  <QrCode className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
-                  <span className="text-[10px] sm:text-xs font-medium">
-                    {ticket.ticket_serial.s.substring(0, 10)}
-                  </span>
+                <div>
+                  <div className="flex items-center text-gray-500">
+                    <QrCode className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+                    <span className="text-[10px] sm:text-xs font-medium">
+                      {ticket.ticket_serial.s.substring(0, 10)} 
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] sm:text-xs font-medium">
+                      Date d’achat :{formatDate(ticket.created_at)}
+                    </span>
+                  </div>
                 </div>
 
                 <Link

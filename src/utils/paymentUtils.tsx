@@ -12,3 +12,20 @@ export function sanitizeWaveUrlBasedOnDevice(url: string): string {
   // Otherwise, return the URL as is
   return url;
 }
+
+
+export function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  
+  // Extract date components
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+  const year = date.getFullYear();
+  
+  // Extract time components
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+  // Format the date and time
+  return `${day}/${month}/${year} à ${hours}:${minutes}`;
+}
