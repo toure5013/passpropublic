@@ -128,7 +128,7 @@ export default function Tickets() {
                     </span>
                   </div>
                   <div>
-                    <span className="text-[10px] sm:text-xs font-medium">
+                    <span className="flex items-center text-gray-500">
                       Date d’achat :{formatDate(ticket.created_at)}
                     </span>
                   </div>
