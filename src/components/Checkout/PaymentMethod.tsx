@@ -5,8 +5,7 @@ import { toast } from "react-toastify";
 import { usePayementStore } from "../../store/payementStore";
 import useAuthStore from "../../store/loginStore";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, Shield, Smartphone } from "lucide-react";
-import CodeInput from "../CodeInput";
+import {  Shield } from "lucide-react";
 import PaymentLoader from "../PaymentLoader";
 import { useCartStore } from "../../store/cartStore";
 import TicketService from "../../providers/ticketService";
@@ -24,9 +23,11 @@ interface PaymentOption {
   color: string;
 }
 interface PayementInstructions {
-  description: string;
+  id: string;
   deepLink?: string;
   redirectUrl?: string;
+  icon: string;
+  name: string;
 }
 
 const paymentOptions: PaymentOption[] = [
@@ -36,7 +37,7 @@ const paymentOptions: PaymentOption[] = [
   //   icon: "/assets/images/payments/bank-card.png",
   //   color: "bg-blue-500",
   // },
- 
+
   {
     id: "orange",
     name: "Orange Money",
@@ -69,7 +70,9 @@ export default function PaymentMethod({
   payment_number,
 }: PaymentMethodProps) {
   const navigate = useNavigate();
-  const [selectedMethod, setSelectedMethod] = useState<string>("");
+  const [selectedMethod, setSelectedMethod] = useState<PaymentOption>(
+    {} as PaymentOption
+  );
   const [isProcessing, setIsProcessing] = useState(false);
   const { setTransaction, setTransactionAllInfo, externalTransactionId } =
     usePayementStore();
@@ -78,7 +81,6 @@ export default function PaymentMethod({
   const [paymentStatus, setPaymentStatus] = useState<
     "processing" | "success" | "error" | "ticketgeneration" | null
   >(null);
-
 
   const [instructions, setInstructions] = useState({} as PayementInstructions);
 
@@ -89,7 +91,6 @@ export default function PaymentMethod({
   const [errorMessage, setErrorMessage] = useState("");
   const [attemptCount, setAttemptCount] = useState(0); // Track the number of attempts
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
 
   // GENERATE USET TICKET
   const buyTickets = async () => {
@@ -136,7 +137,6 @@ export default function PaymentMethod({
   const handlePayment = async () => {
     if (!selectedMethod || isProcessing) return;
 
-  
     // Is already conneceted
     setIsProcessing(true);
 
@@ -144,19 +144,19 @@ export default function PaymentMethod({
       const response = await PaiementService.cashout({
         user_uuid: userInfo.uuid,
         number_to_debit: payment_number,
-        platform: selectedMethod,
+        platform: selectedMethod.id,
         amount: amount,
-        items : items
+        raw_data: items,
       });
 
       console.log({
         user_uuid: userInfo.uuid,
         number_to_debit: payment_number,
-        platform: selectedMethod,
+        platform: selectedMethod.id,
         amount: amount,
-        items : items
+        items: items,
       });
-      
+
       console.log(response);
 
       if (!response.success) {
@@ -176,7 +176,7 @@ export default function PaymentMethod({
           ? response.data.data._be_removed_deepLinkUrl_
           : "";
         const codeService = response.data.data.codeService;
-        const plateform = selectedMethod;
+        const plateform = selectedMethod.id;
 
         //  Save data to session storage
         sessionStorage.setItem("externalTransactionId", externalTransactionId);
@@ -194,11 +194,10 @@ export default function PaymentMethod({
         sessionStorage.setItem("plateform", plateform);
 
         setInstructions({
-          description:
-            plateform === "mtn" || plateform === "moov"
-              ? "Une demande de débit de paiement a été envoyée à votre numéro de téléphone. Veuillez vérifier votre téléphone pour confirmer le paiement."
-              : "Veuillez cliquer sur le lien suivant afin de procéder au paiement.",
           redirectUrl: _be_removed_deepLinkUrl_,
+          name: plateform,
+          icon: selectedMethod.icon,
+          id: selectedMethod.id,
         });
 
         // Save payment data to the store
@@ -227,7 +226,7 @@ export default function PaymentMethod({
         setPaymentStatus("processing");
 
         // Activate payement checker
-        payementCheckerTimer(5000);
+        // payementCheckerTimer(5000);
       } else {
         setIsProcessing(false);
         toast.error(response.message);
@@ -310,13 +309,13 @@ export default function PaymentMethod({
 
   async function payementCheckerTimer(interval = 5000) {
     console.log("interval", interval);
-    
+
     try {
       // Clear any existing timers to avoid duplicates
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
-  
+
       // Start a new interval
       timerRef.current = setInterval(() => {
         setAttemptCount((prev) => prev + 1);
@@ -329,16 +328,17 @@ export default function PaymentMethod({
       console.error(error);
     }
   }
-  
 
   useEffect(() => {
     // Start the payment checker only if transaction information exists
-    if (transactionLocalInformation && transactionLocalInformation._be_removed_deepLinkUrl_) {
+    if (
+      transactionLocalInformation &&
+      transactionLocalInformation._be_removed_deepLinkUrl_
+    ) {
       payementStatusChecker();
     }
-  
   }, [transactionLocalInformation, attemptCount]); // Depend only on transactionLocalInformation
-  
+
   return (
     <div>
       <div className="mb-6">
@@ -355,7 +355,7 @@ export default function PaymentMethod({
           <motion.label
             key={option.id}
             className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
-              selectedMethod === option.id
+              selectedMethod.id === option.id
                 ? "border-brand-red bg-brand-red/5"
                 : "border-gray-200 hover:border-gray-300"
             }`}
@@ -366,8 +366,11 @@ export default function PaymentMethod({
               type="radio"
               name="paymentMethod"
               value={option.id}
-              checked={selectedMethod === option.id}
-              onChange={(e) => setSelectedMethod(e.target.value)}
+              checked={selectedMethod.id === option.id}
+              onChange={() => {
+                console.log("option", option);
+                setSelectedMethod(option);
+              }}
               className="sr-only"
               disabled={isProcessing}
             />
@@ -383,12 +386,12 @@ export default function PaymentMethod({
             </div>
             <div
               className={`w-4 h-4 rounded-full border-2 ml-4 ${
-                selectedMethod === option.id
+                selectedMethod.id === option.id
                   ? "border-brand-red bg-brand-red"
                   : "border-gray-300"
               }`}
             >
-              {selectedMethod === option.id && (
+              {selectedMethod.id === option.id && (
                 <div className="w-2 h-2 m-0.5 rounded-full bg-white" />
               )}
             </div>
@@ -445,7 +448,7 @@ export default function PaymentMethod({
             instructions={instructions}
             orderDetails={{
               amount,
-              paymentMethod: selectedMethod || "",
+              paymentMethod: selectedMethod.id || "",
               tel: ticketOwnerInfo.tel,
             }}
           />

@@ -11,17 +11,17 @@ import {
 import { sanitizeWaveUrlBasedOnDevice } from "../utils/paymentUtils";
 
 interface PayementInstructions {
-  description: string;
   deepLink?: string;
-  externalTransactionId? : string;
-  _be_removed_deepLinkUrl_? : string;
+  externalTransactionId?: string;
+  _be_removed_deepLinkUrl_?: string;
   redirectUrl?: string;
+  icon: string;
+  name: string;
 }
 interface PaymentLoaderProps {
   status: "processing" | "success" | "error" | "ticketgeneration";
   message?: string;
-  instructions?: PayementInstructions;
-
+  instructions: PayementInstructions;
   orderDetails?: {
     amount: number;
     paymentMethod: string;
@@ -40,21 +40,19 @@ export default function PaymentLoader({
   orderDetails,
   instructions,
 }: PaymentLoaderProps) {
-
-  
-
-
   const getStatusConfig = () => {
     switch (status) {
       case "processing":
-        return { 
+        return {
           icon: <Loader2 className="h-12 w-12 text-brand-red" />,
-          text: message || `Nous vérifions votre paiement...
-Une fois que votre paiement sera confirmé, vous retrouverez votre commande dans le menu "Mes Tickets"..`, 
-          bgColor: "bg-brand-yellow/10", 
-          textColor: "text-brand-red", 
-          instruction: 
-            "Ne fermez pas cette fenêtre pendant le traitement du paiement.", 
+          text: `En attente de paiement`,
+          bgColor: "bg-brand-yellow/10",
+          textColor: "text-brand-red",
+          instruction: instructions.name === "mtn" || instructions.name === "moov"
+          ? "Une demande de débit de paiement a été envoyée à votre numéro de téléphone. Veuillez vérifier votre téléphone pour confirmer le paiement."
+          : "Veuillez cliquer sur le bouton ci-dessous pour effectuer le paiement",
+          isBouttonActive:
+            instructions.name == "wave" || instructions.name == "orange",
         };
       case "success":
         return {
@@ -103,16 +101,23 @@ Une fois que votre paiement sera confirmé, vous retrouverez votre commande dans
           className={`w-24 h-24 ${config.bgColor} rounded-full flex items-center justify-center mx-auto mb-6`}
         >
           {status === "processing" ? (
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{
-                duration: 1,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-            >
-              {config.icon}
-            </motion.div>
+            // <motion.div
+            //   animate={{ rotate: 360 }}
+            //   transition={{
+            //     duration: 1,
+            //     repeat: Infinity,
+            //     ease: "linear",
+            //   }}
+            // >
+            //   {config.icon}
+            // </motion.div>
+            <div className="flex items-center ">
+              <img
+                src={instructions.icon}
+                alt={instructions.name}
+                className="h-8 w-8 object-contain"
+              />
+            </div>
           ) : (
             config.icon
           )}
@@ -132,6 +137,24 @@ Une fois que votre paiement sera confirmé, vous retrouverez votre commande dans
             {config.instruction}
           </p>
 
+          {config.isBouttonActive && (
+            <motion.button
+              onClick={() => {
+                if (instructions.deepLink) {
+                  window.open(
+                    sanitizeWaveUrlBasedOnDevice(instructions.deepLink),
+                    "_blank"
+                  );
+                }
+              }}
+              className="w-full py-2 mb-4 bg-brand-button text-white rounded-brand text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+            >
+              Payer maintenant
+            </motion.button>
+          )}
+
           {orderDetails && (
             <div className="border-t pt-4">
               <div className="space-y-4">
@@ -147,46 +170,18 @@ Une fois que votre paiement sera confirmé, vous retrouverez votre commande dans
                   <span>+225 {orderDetails.tel}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Info className="h-4 w-4 text-brand-red" />
+                  <Info className="h-10 w-10 text-brand-red text-xs" />
                   <span className="text-xs font-medium text-gray-900">
-                    {instructions?.description}{" "}
-                    {instructions?.redirectUrl ? (
-                      <a
-                        href={sanitizeWaveUrlBasedOnDevice(
-                          instructions.redirectUrl
-                        )}
-                        target="_blank"
-                        className="text-brand-red"
-                      >
-                        {" "}
-                        cliquez ici{" "}
-                      </a>
-                    ) : null}
+                    Une fois votre paiement confirmé par l’opérateur, vous
+                    recevrez un SMS de confirmation.
                   </span>
                 </div>
               </div>
             </div>
           )}
-
-          {status === "processing" && (
-            <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden mt-6">
-              <motion.div
-                className="h-full bg-brand-red"
-                initial={{ width: "0%" }}
-                animate={{
-                  width: ["0%", "100%"],
-                  transition: {
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  },
-                }}
-              />
-            </div>
-          )}
-
-          <div className="text-sm text-gray-600 text-center mt-6">
-            {instructions &&instructions.externalTransactionId}
+          <div className="text-xs text-gray-600 text-center mt-2">
+            Si après 24H, vous n’avez toujours pas reçu votre ticket, veuillez
+            contacter le service client au +225 07 59 94 94 94
           </div>
         </motion.div>
       </motion.div>
