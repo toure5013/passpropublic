@@ -62,11 +62,6 @@ export default function EventBooking() {
     link.href = `${configService.baseUrlImage}${event.event_ticket_img}`;
   }, [ event]);
 
-  const handleAddToCart = (selections: Record<string, number>) => {
-    // Ajouter au panier
-    console.log("Sélections:", selections);
-  };
-
   return (
     <>
       {event ? (

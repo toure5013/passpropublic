@@ -1,15 +1,43 @@
 import create from "zustand";
 import { persist } from "zustand/middleware";
+import { MyCustomEventPlace, MyCustomEventType } from "../utils/eventtypes";
 
-interface CartItem {
-  eventId: number;
-  eventTitle: string;
+export type CartItem = {
+  id: number;
+  event_name: string;
   ticketPriceId: number;
   price_label: string;
-  quantity: number;
   price: number;
-  event_ticket_img : string
-}
+  quantity: number;
+  payment_online: string;
+  payment_on_delivery: string;
+  ticket_physic: string;
+  ticket_virtual: string;
+
+  event_enterprise_name?: string;
+  event_type_id?: number;
+  description?: string | null;
+  event_ticket_img?: string;
+  event_date: string;
+  event_cover?: string;
+  event_hour?: string;
+  event_place_id?: number;
+  event_localization: string;
+  event_commune?: string;
+  event_room?: string;
+  event_room_capacity: string;
+  event_longitude?: string;
+  event_latitude?: string;
+
+  observation?: string | null;
+  recommandation?: string | null;
+  status?: number;
+  created_at?: string;
+  updated_at?: string;
+  event_type?: MyCustomEventType;
+  event_place?: MyCustomEventPlace;
+};
+
 
 interface CartStore {
   items: CartItem[];
@@ -54,7 +82,7 @@ export const useCartStore = create<CartStore>()(
         set((state) => {
           const existingItem = state.items.find(
             (i) =>
-              i.eventId === item.eventId &&
+              i.id === item.id &&
               i.ticketPriceId === item.ticketPriceId
           );
 
@@ -62,7 +90,7 @@ export const useCartStore = create<CartStore>()(
             return {
               ...state,
               items: state.items.map((i) =>
-                i.eventId === item.eventId &&
+                i.id === item.id &&
                 i.ticketPriceId === item.ticketPriceId
                   ? { ...i, quantity: i.quantity + item.quantity }
                   : i
@@ -84,7 +112,7 @@ export const useCartStore = create<CartStore>()(
         set((state) => ({
           ...state,
           items: state.items.filter(
-            (i) => !(i.eventId == eventId && i.ticketPriceId == ticketPriceId)
+            (i) => !(i.id == eventId && i.ticketPriceId == ticketPriceId)
           ),
         }));
       },
@@ -93,7 +121,7 @@ export const useCartStore = create<CartStore>()(
         set((state) => ({
           ...state,
           items: state.items.map((item) =>
-            item.eventId == eventId && item.ticketPriceId == ticketPriceId
+            item.id == eventId && item.ticketPriceId == ticketPriceId
               ? { ...item, quantity }
               : item
           ),

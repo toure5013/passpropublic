@@ -29,6 +29,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PaymentIframe from "./components/Checkout/PaymentIframe";
 import { CartTimerProvider } from "./context/CartTimerContext";
+import PaymentStatus from "./components/Checkout/PaymentStatus";
 
 function ScrollToTop() {
   const location = useLocation();
@@ -88,6 +89,12 @@ function AppContent() {
                       path="/paiement/succes"
                       element={<PaymentSuccess />}
                     />
+
+                    <Route
+                      path="/paiement/status/:trid"
+                      element={<PaymentStatus />}
+                    />
+
                     <Route path="/paiement/erreur" element={<PaymentError />} />
                   </Routes>
                 </CartTimerProvider>

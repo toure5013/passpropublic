@@ -101,7 +101,7 @@ export default function Cart() {
           <div className="space-y-3 sm:space-y-4">
             {items.map((item) => (
               <motion.div 
-                key={`${item.eventId}-${item.ticketPriceId}`}
+                key={`${item.id}-${item.ticketPriceId}`}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
@@ -111,7 +111,7 @@ export default function Cart() {
                   <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-lg overflow-hidden">
                     {item ? <ImageLoader
                        src={configService.baseUrlImage + item.event_ticket_img}
-                       alt={item.eventTitle}
+                       alt={item.event_name}
                       className="w-full h-full object-cover"
                     /> : ''}
                   </div>
@@ -120,14 +120,14 @@ export default function Cart() {
                     <div className="flex justify-between items-start">
                       <div className="min-w-0">
                         <h3 className="text-sm font-semibold text-gray-900 mb-0.5 truncate">
-                          {getEventByIdAsync(item.eventId).event_name}
+                          {getEventByIdAsync(item.id).event_name}
                         </h3>
                         <p className="text-xs text-gray-600 mb-2">
                           Catégorie: {item.price_label}
                         </p>
                       </div>
                       <button
-                        onClick={() => removeFromCart(item.eventId, item.ticketPriceId)}
+                        onClick={() => removeFromCart(item.id, item.ticketPriceId)}
                         className="text-gray-400 hover:text-gray-500 ml-2"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -137,7 +137,7 @@ export default function Cart() {
                     <div className="flex justify-between items-center">
                       <div className="flex items-center space-x-2">
                         <button
-                          onClick={() => updateQuantity(item.eventId, item.ticketPriceId, item.quantity - 1)}
+                          onClick={() => updateQuantity(item.id, item.ticketPriceId, item.quantity - 1)}
                           className="p-1 rounded-md hover:bg-gray-100"
                           disabled={item.quantity <= 1}
                         >
@@ -147,7 +147,7 @@ export default function Cart() {
                           {item.quantity}
                         </span>
                         <button
-                          onClick={() => updateQuantity(item.eventId, item.ticketPriceId, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.id, item.ticketPriceId, item.quantity + 1)}
                           className="p-1 rounded-md hover:bg-gray-100"
                           disabled={item.quantity >= 10}
                         >

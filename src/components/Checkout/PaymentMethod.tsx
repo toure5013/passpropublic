@@ -100,11 +100,11 @@ export default function PaymentMethod({
           nom: userInfo.name,
           prenoms: userInfo.surname,
           tel: userInfo.tel,
-          event_id: items[i].eventId,
+          event_id: items[i].id,
           event_ticket_price_id: items[i].ticketPriceId,
           is_for_me: true,
-          payment_type: "online",
-          ticket_type: "virtual",
+          payment_type: items[i].payment_online ? "online" : "on_delivery",
+          ticket_type: items[i].ticket_virtual ? "virtual" : "physic",
           ticket_owner_info: {
             nom: ticketOwnerInfo.name ? ticketOwnerInfo.name : userInfo.name,
             prenoms: ticketOwnerInfo.surname
@@ -114,7 +114,7 @@ export default function PaymentMethod({
           },
           delivery_information: {
             district_id: 1,
-            adresse_geo: "",
+            adresse_geo: "En ligne",
           },
         });
 
@@ -149,6 +149,14 @@ export default function PaymentMethod({
         items : items
       });
 
+      console.log({
+        user_uuid: userInfo.uuid,
+        number_to_debit: payment_number,
+        platform: selectedMethod,
+        amount: amount,
+        items : items
+      });
+      
       console.log(response);
 
       if (!response.success) {

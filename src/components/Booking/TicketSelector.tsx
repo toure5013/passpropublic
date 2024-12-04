@@ -1,92 +1,122 @@
-import React, { useState } from 'react';
-import { Minus, Plus, Ticket } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useCartStore } from '../../store/cartStore';
-import { MyCustomEvent, MyCustomEventTicketPrice } from '../../utils/eventtypes';
-
-
+import React, { useState } from "react";
+import { Minus, Plus, Ticket } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { useCartStore } from "../../store/cartStore";
+import {
+  MyCustomEvent,
+  MyCustomEventTicketPrice,
+} from "../../utils/eventtypes";
 
 interface TicketSelectorProps {
-  event : MyCustomEvent,
+  event: MyCustomEvent;
   eventId: number;
   eventTitle: string;
   ticketPrices: MyCustomEventTicketPrice[];
 }
 
-export default function TicketSelector({ event , eventId, eventTitle, ticketPrices }: TicketSelectorProps) {
+export default function TicketSelector({
+  event,
+  ticketPrices,
+}: TicketSelectorProps) {
   const navigate = useNavigate();
-  const { 
-    items, 
-    removeFromCart, 
-    getTotal, 
+  const {
+    items,
+    removeFromCart,
+    getTotal,
     getFinalTotal,
     promoCode,
     promoDiscount,
     applyPromoCode,
     addToCart,
-    removePromoCode
+    removePromoCode,
   } = useCartStore();
-  
+
   const [selections, setSelections] = useState<Record<number, number>>(() => {
     //if items is not empty, set selections to items
     if (items.length > 0) {
-      return items.reduce((acc, item) => ({
-        ...acc,
-        [item.ticketPriceId]: item.quantity
-      }), {});
-    }else {
-      return ticketPrices.reduce((acc, ticketPrice) => ({
-        ...acc,
-        [ticketPrice.id]: 0
-      }), {});
+      return items.reduce(
+        (acc, item) => ({
+          ...acc,
+          [item.ticketPriceId]: item.quantity,
+        }),
+        {}
+      );
+    } else {
+      return ticketPrices.reduce(
+        (acc, ticketPrice) => ({
+          ...acc,
+          [ticketPrice.id]: 0,
+        }),
+        {}
+      );
     }
-  
   });
 
   const updateQuantity = (ticketPriceId: number, delta: number) => {
     console.log("j'update");
-    
-    const currentQuantity = selections[ticketPriceId] ? selections[ticketPriceId] : 0;
-    const ticketPrice = ticketPrices.find(c => c.id === ticketPriceId);
-    
+
+    const currentQuantity = selections[ticketPriceId]
+      ? selections[ticketPriceId]
+      : 0;
+    const ticketPrice = ticketPrices.find((c) => c.id === ticketPriceId);
+
     if (!ticketPrice) return;
-    
+
     const newQuantity = currentQuantity + delta;
     if (newQuantity >= 0) {
-      setSelections(prev => ({
+      setSelections((prev) => ({
         ...prev,
-        [ticketPriceId]: newQuantity
+        [ticketPriceId]: newQuantity,
       }));
     }
   };
 
-  const hasSelections = Object.values(selections).some(quantity => quantity > 0);
-  
+  const hasSelections = Object.values(selections).some(
+    (quantity) => quantity > 0
+  );
+
   const totalAmount = ticketPrices.reduce((sum, ticketPrice) => {
-    return sum + (ticketPrice.price * (selections[ticketPrice.id] || 0));
+    return sum + ticketPrice.price * (selections[ticketPrice.id] || 0);
   }, 0);
 
   const handleProceedToCheckout = () => {
     // Ajouter chaque sélection au panier
     Object.entries(selections).forEach(([ticketPriceId, quantity]) => {
       if (quantity > 0) {
-        const ticketPrice = ticketPrices.find(c => c.id === +ticketPriceId);
+        const ticketPrice = ticketPrices.find((c) => c.id === +ticketPriceId);
         if (ticketPrice) {
           addToCart({
-            eventId,
-            eventTitle,
-            ticketPriceId : +ticketPriceId,
+            id: event.id,
+            quantity: quantity,
+            event_name: event.event_name,
+            ticketPriceId: +ticketPriceId,
             price_label: ticketPrice.price_label,
-            quantity,
             price: ticketPrice.price,
-            event_ticket_img : event.event_ticket_img ? event.event_ticket_img : ''
+            event_ticket_img: event.event_ticket_img
+              ? event.event_ticket_img
+              : "",
+            event_cover: event.event_cover ? event.event_cover : "",
+            event_date: event.event_date ? event.event_date : "",
+            event_hour: event.event_hour ? event.event_hour : "",
+            event_localization: event.event_localization
+              ? event.event_localization
+              : "",
+            event_room_capacity: event.event_room_capacity
+              ? event.event_room_capacity
+              : "",
+            event_commune: event.event_commune,
+            payment_online: event.payment_online ?  event.payment_online : "",
+            payment_on_delivery: event.payment_on_delivery ? event.payment_on_delivery :  "",
+            ticket_physic: event.ticket_physic ? event.ticket_physic :  "",
+            ticket_virtual: event.ticket_virtual ? event.ticket_virtual : "",
+            observation: event.observation,
           });
         }
       }
     });
-    
-    navigate('/panier');
+
+    navigate("/panier");
   };
 
   return (
@@ -102,7 +132,7 @@ export default function TicketSelector({ event , eventId, eventTitle, ticketPric
 
       <div className="space-y-4">
         {ticketPrices.map((ticketPrice, index) => (
-          <motion.div 
+          <motion.div
             key={index}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -124,7 +154,9 @@ export default function TicketSelector({ event , eventId, eventTitle, ticketPric
                   </p>
                 </div> */}
               </div>
-              <p className="text-xs text-gray-600 mb-1">{ticketPrice.price_label}</p>
+              <p className="text-xs text-gray-600 mb-1">
+                {ticketPrice.price_label}
+              </p>
               <p className="text-sm font-semibold text-brand-red">
                 {ticketPrice.price.toLocaleString()} F CFA
               </p>
@@ -140,7 +172,7 @@ export default function TicketSelector({ event , eventId, eventTitle, ticketPric
               >
                 <Minus className="h-4 w-4 text-gray-600" />
               </motion.button>
-              
+
               <AnimatePresence mode="wait">
                 <motion.span
                   key={selections[ticketPrice.id] + index}
@@ -152,13 +184,16 @@ export default function TicketSelector({ event , eventId, eventTitle, ticketPric
                   {selections[ticketPrice.id] || 0}
                 </motion.span>
               </AnimatePresence>
-              
+
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => updateQuantity(ticketPrice.id, 1)}
                 className="p-1 rounded-md hover:bg-gray-200 transition-colors disabled:opacity-50"
-                disabled={selections[ticketPrice.id] >= Math.min(10, (+event.event_room_capacity))}
+                disabled={
+                  selections[ticketPrice.id] >=
+                  Math.min(10, +event.event_room_capacity)
+                }
               >
                 <Plus className="h-4 w-4 text-gray-600" />
               </motion.button>
@@ -171,7 +206,7 @@ export default function TicketSelector({ event , eventId, eventTitle, ticketPric
         {hasSelections && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
+            animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             className="mt-6 space-y-4"
           >
