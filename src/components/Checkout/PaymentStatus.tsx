@@ -8,7 +8,7 @@ import PaiementService from "../../providers/paiementService";
 import { AnimatePresence, motion } from "framer-motion";
 import PaymentLoader from "../PaymentLoader";
 import ModalLoader from "../ModalLoader";
-import UserService from '../../providers/userServices';
+import UserService from "../../providers/userServices";
 
 interface PayementInstructions {
   id: string;
@@ -25,11 +25,11 @@ export default function PaymentStatus() {
   // payement status checker
   const [attemptCount, setAttemptCount] = useState(0); // Track the number of attempts
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-//   const { userInfo } = useAuthStore();
+  //   const { userInfo } = useAuthStore();
   const [items, setItems] = useState<any>([]);
   const [externalTransactionId, setExternalTransactionId] = useState("");
   const [ticketOwnerInfo, setTicketOwnerInfo] = useState<any>({});
-  
+
   const [paymentStatus, setPaymentStatus] = useState<
     "processing" | "success" | "error" | "ticketgeneration" | null
   >(null);
@@ -91,21 +91,22 @@ export default function PaymentStatus() {
     }
   }
 
-
   async function getUserByPhoneNumber(phoneNumber: string): Promise<any> {
     try {
-      const response:any = await UserService.searchUserByPhoneNumber(phoneNumber);
+      const response: any = await UserService.searchUserByPhoneNumber(
+        phoneNumber
+      );
 
-      if(response.success){
-        return response.user
-      }else {
-        return null
+      if (response.success) {
+        return response.user;
+      } else {
+        return null;
       }
     } catch (error) {
       console.error("Error fetching user by phone number:", error);
       return null;
+    }
   }
-}   
 
   async function getOrderMetaData(): Promise<void> {
     try {
@@ -122,9 +123,16 @@ export default function PaymentStatus() {
         return;
       }
 
+      if (paymentData.status == "COMPLETED") {
+        toast.info("Vos tickets on dejà été générés. Merci.");
+        navigate("/tickets");
+        return;
+      }
+
       if (
         paymentData.status === "SUCCESS" ||
-        paymentData.status === "SUCCESSFUL" || paymentData.status === "PAID" || true
+        paymentData.status === "SUCCESSFUL" ||
+        paymentData.status === "PAID"
       ) {
         // Parse raw_data into JSON if it exists
         if (paymentData.raw_data) {
@@ -145,34 +153,31 @@ export default function PaymentStatus() {
 
         // Get uset all information by
         const ticketOwnerInfo = await getUserByPhoneNumber(
-            paymentData.user_tel,
-        )
+          paymentData.user_tel
+        );
 
         setTicketOwnerInfo(ticketOwnerInfo ? ticketOwnerInfo : {});
 
-
         console.log("Ticket owner info:", ticketOwnerInfo);
-        
 
         // Generate tickets
         await buyTickets();
 
         // CHANGE CART REMOTE STATUS
         console.log("PAYLAOD", {
-            ...paymentData,
-            status: "COMPLETED",
+          ...paymentData,
+          status: "COMPLETED",
         });
-        
+
         try {
           const updateCartResponse = await TicketService.updateUserCart(
             paymentData.user_tel,
             {
-                ...paymentData,
-                status: "COMPLETED",
+              ...paymentData,
+              status: "COMPLETED",
             }
           );
           console.log("updateCartResponse", updateCartResponse);
-          
         } catch (error) {
           console.error("Error deleting cart item:", error);
           toast.error(
@@ -184,13 +189,14 @@ export default function PaymentStatus() {
         setPaymentStatus("success");
         navigate("/paiement/succes");
       } else if (
-        !paymentData.status ||
         paymentData.status == "PENDING" ||
         paymentData.status == "PROCESSING"
       ) {
         setPaymentStatus("processing");
-        console.log("En cours de traitement, le panier n'est pas encore payer...");
-        
+        console.log(
+          "En cours de traitement, le panier n'est pas encore payer..."
+        );
+
         orderCheckerTimer();
       } else if (
         paymentData.status === "FAIL" ||
