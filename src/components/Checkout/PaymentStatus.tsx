@@ -155,7 +155,7 @@ export default function PaymentStatus() {
         
 
         // Generate tickets
-        //await buyTickets();
+        await buyTickets();
 
         // CHANGE CART REMOTE STATUS
         console.log("PAYLAOD", {
