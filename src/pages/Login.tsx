@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import useAuthStore from "../store/loginStore";
 import UserService from "../providers/userServices";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import promoterUserService from "../providers/promoters/promoterUserService";
 import { toast } from "react-toastify";
 import PhoneInput from "../components/PhoneInput";
@@ -31,12 +31,47 @@ export default function Login() {
   const [otpSent, setOtpSent] = useState(false);
   const [otpSentTimer, setOtpSentTimer] = useState(0);
 
+  const [redirectPath, setRedirectPath] = useState("/home");
+
   const navigate = useNavigate();
 
+  function getQueryVariable(variable: string) {
+    var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i = 0; i < vars.length; i++) {
+      var pair = vars[i].split("=");
+      if (pair[0] == variable) {
+        return pair[1];
+      }
+    }
+    return false;
+  }
+
   useEffect(() => {
+    const route_from = getQueryVariable("route_from");
+
+    if (!isLoggedIn) {
+      const redirect_path = `/${route_from ? route_from : "home"}`;
+      console.log("redirect_path --", redirect_path);
+      setRedirectPath(redirect_path);
+    }
+
     console.log("isLoggedIn value:", isLoggedIn); // Debugging
     if (isLoggedIn && userInfo.userType === "public") {
-      navigate("/home");
+      navigate(`/${route_from ? route_from : "home"}`);
+    } else if (isLoggedIn && userInfo.userType === "promoter") {
+      navigate("/espace-promoteur");
+    }
+  }, []);
+
+  useEffect(() => {
+    const route_from = getQueryVariable("route_from");
+
+    console.log("isLoggedIn value:", isLoggedIn); // Debugging
+    if (isLoggedIn && userInfo.userType === "public") {
+      const redirect_path = `/${route_from ? route_from : "home"}`;
+      console.log("redirect_path --", redirect_path);
+      setRedirectPath(redirect_path);
     } else if (isLoggedIn && userInfo.userType === "promoter") {
       navigate("/espace-promoteur");
     }
@@ -102,7 +137,7 @@ export default function Login() {
   const loginPublic = async () => {
     const enteredCode = code.join("");
     if (!enteredCode || enteredCode.length !== 6) {
-      setError("Veuillez entrer le code complet");
+      // setError("Veuillez entrer le code complet");
       return;
     }
 
@@ -130,7 +165,12 @@ export default function Login() {
 
       // Navigate based on user status
       toast.success(response["message"]);
-      navigate("/home");
+
+      console.log("redirectPath ========", redirectPath);
+      
+      window.location.href = redirectPath;
+
+      // navigate(redirectPath);
     } else {
       console.log("response");
       console.log(response["message"]);
