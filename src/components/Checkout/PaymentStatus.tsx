@@ -161,7 +161,7 @@ export default function PaymentStatus() {
         console.log("Ticket owner info:", ticketOwnerInfo);
 
         // Generate tickets
-        await buyTickets();
+        // await buyTickets();
 
         // CHANGE CART REMOTE STATUS
         console.log("PAYLAOD", {
@@ -169,21 +169,21 @@ export default function PaymentStatus() {
           status: "COMPLETED",
         });
 
-        try {
-          const updateCartResponse = await TicketService.updateUserCart(
-            paymentData.user_tel,
-            {
-              ...paymentData,
-              status: "COMPLETED",
-            }
-          );
-          console.log("updateCartResponse", updateCartResponse);
-        } catch (error) {
-          console.error("Error deleting cart item:", error);
-          toast.error(
-            "Une erreur est survenue lors de la suppression de l'article du panier."
-          );
-        }
+        // try {
+        //   const updateCartResponse = await TicketService.updateUserCart(
+        //     paymentData.user_tel,
+        //     {
+        //       ...paymentData,
+        //       status: "COMPLETED",
+        //     }
+        //   );
+        //   console.log("updateCartResponse", updateCartResponse);
+        // } catch (error) {
+        //   console.error("Error deleting cart item:", error);
+        //   toast.error(
+        //     "Une erreur est survenue lors de la suppression de l'article du panier."
+        //   );
+        // }
 
         // Navigate to success page
         setPaymentStatus("success");
@@ -197,7 +197,7 @@ export default function PaymentStatus() {
           "En cours de traitement, le panier n'est pas encore payer..."
         );
 
-        orderCheckerTimer();
+        // orderCheckerTimer();
       } else if (
         paymentData.status === "FAIL" ||
         paymentData.status === "FAILLED"
@@ -215,27 +215,16 @@ export default function PaymentStatus() {
 
   useEffect(() => {
     if (!trid) {
-      toast.error(
-        "Nous avons pas reçu vos informations de paiement. Veuillez recommencer."
-      );
+    //   toast.error(
+    //     "Nous avons pas reçu vos informations de paiement. Veuillez recommencer."
+    //   );
       // navigate("/");
       return;
     }
     setExternalTransactionId(`${trid}`);
-    orderCheckerTimer();
+    // orderCheckerTimer();
   }, []);
 
-  useEffect(() => {
-    if (!trid) {
-      toast.error(
-        "Nous avons pas reçu vos informations de paiement. Veuillez recommencer."
-      );
-      // navigate("/");
-      return;
-    }
-    setExternalTransactionId(`${trid}`);
-    orderCheckerTimer();
-  }, [trid, attemptCount]);
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
@@ -244,7 +233,7 @@ export default function PaymentStatus() {
           "Si après 24H, vous n’avez toujours pas reçu votre ticket, veuillez contacter le service client au +225 07 59 94 94 94"
         }
         title="Vérification du paiement"
-        description="Veuillez patienter quelques instants. Pendant que nous vérifions le paiement."
+        description="Votre ticket est en cours de traitement, vous recevrez un sms de confirmation lorsque votre ticket est disponible."
       />
     </div>
   );
