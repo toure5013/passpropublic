@@ -36,12 +36,11 @@ export default function Checkout() {
   const handleTicketOwnerInfoSubmit = async (
     tickerOwnerInfo: TicketOwnerInfoType
   ) => {
-    ;
-
     if (!isLoggedIn || !userInfo.user_uuid) {
-      handleSendOtp();
+      await handleSendOtp();
+      setCurrentStep("payment");
+      return;
     }
-
 
     setTicketOwnerInfo({
       user_uuid: userInfo.user_uuid,
@@ -52,7 +51,7 @@ export default function Checkout() {
 
     // update all cart items by adding user info
     updateUserInfo(tickerOwnerInfo);
-    updateAllItemsOwnerInformation(tickerOwnerInfo)
+    updateAllItemsOwnerInformation(tickerOwnerInfo);
 
     // Go to payement
     setCurrentStep("payment");
@@ -73,12 +72,29 @@ export default function Checkout() {
         false
       );
 
+      console.log(response);
+      
       if (response.success) {
         toast.success("Information enregistrée avec succès !");
 
         // Set user infos
         updateUserInfo({
-          user_uuid: response.user_uuid,
+          user_uuid: response.user.uuid,
+          tel: ticketOwnerInfo.tel,
+          name: ticketOwnerInfo.name ? ticketOwnerInfo.name : "",
+          surname: ticketOwnerInfo.surname ? ticketOwnerInfo.surname : "",
+        });
+
+        setTicketOwnerInfo({
+          user_uuid: response.user.uuid,
+          tel: ticketOwnerInfo.tel,
+          name: ticketOwnerInfo.name ? ticketOwnerInfo.name : "",
+          surname: ticketOwnerInfo.surname ? ticketOwnerInfo.surname : "",
+        });
+
+        // update all cart items by adding user info
+        updateAllItemsOwnerInformation({
+          user_uuid: response.user.uuid,
           tel: ticketOwnerInfo.tel,
           name: ticketOwnerInfo.name ? ticketOwnerInfo.name : "",
           surname: ticketOwnerInfo.surname ? ticketOwnerInfo.surname : "",
@@ -98,14 +114,14 @@ export default function Checkout() {
   useEffect(() => {
     if (!isLoggedIn) {
       //remove user info from local storage
-      localStorage.removeItem("user_tel");
-      localStorage.removeItem("user_uuid");
-      localStorage.removeItem("user_name");
-      localStorage.removeItem("user_surname");
-      localStorage.removeItem("user");
-      localStorage.removeItem("user_info");
-      localStorage.removeItem("user_wallet");
-      updateUserInfo({});
+      // localStorage.removeItem("user_tel");
+      // localStorage.removeItem("user_uuid");
+      // localStorage.removeItem("user_name");
+      // localStorage.removeItem("user_surname");
+      // localStorage.removeItem("user");
+      // localStorage.removeItem("user_info");
+      // localStorage.removeItem("user_wallet");
+      // // updateUserInfo({});
     }
   }, []);
 

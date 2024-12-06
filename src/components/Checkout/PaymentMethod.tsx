@@ -95,7 +95,7 @@ export default function PaymentMethod({
 
     try {
       const payload = {
-        user_uuid: userInfo.uuid,
+        user_uuid: userInfo.user_uuid,
         number_to_debit: payment_number,
         platform: selectedMethod.id,
         amount: amount,
