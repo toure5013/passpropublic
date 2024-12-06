@@ -37,10 +37,10 @@ class UserService {
     }
   }
 
-  static async register(data: Record<string, any>): Promise<ApiResponse> {
+  static async register(data: Record<string, any>, send_otp: boolean= true): Promise<ApiResponse> {
     try {
       const response: AxiosResponse<ApiResponse> = await axios.post(
-        `${this.baseURL}/api/users`,
+        `${this.baseURL}/api/users?send_otp=${send_otp}`,
         data
       );
       console.log("Data Register ::::", response.data);
