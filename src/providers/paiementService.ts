@@ -55,6 +55,33 @@ class PaiementService {
     }
   }
 
+    // Method to check transaction status
+    static async checkTransactionStatusAsync(
+      partnerTransactionId: string,
+      urlGenerateTicket: string
+    ): Promise<AxiosResponse> {
+      const requestData = {
+        partner_transaction_id: partnerTransactionId,
+        url_generate_ticket: urlGenerateTicket,
+      };
+  
+      try {
+        const response = await axios.post(
+          `${this.baseURL}/api/paiement/checkTransactionStatusAsync`,
+          requestData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        return response;
+      } catch (error: any) {
+        console.error("Error checking transaction status: ", error?.response?.data);
+        return error.response;
+      }
+    }
+
   
 
   // Méthode pour obtenir les historiques

@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Shield } from "lucide-react";
 import PaymentLoader from "../PaymentLoader";
 import { useCartStore } from "../../store/cartStore";
+import { configService } from "../../providers/configService";
 
 interface PaymentMethodProps {
   amount: number;
@@ -94,11 +95,11 @@ export default function PaymentMethod({
 
     try {
       const payload = {
-        "user_uuid": userInfo.uuid,
-        "number_to_debit": payment_number,
-        "platform": selectedMethod.id,
-        "amount": amount,
-        "raw_data": items,
+        user_uuid: userInfo.uuid,
+        number_to_debit: payment_number,
+        platform: selectedMethod.id,
+        amount: amount,
+        raw_data: items,
       };
       const response = await PaiementService.cashout(payload);
 
@@ -161,6 +162,13 @@ export default function PaymentMethod({
           transactionId: response.data.data.transactionId,
           tel: response.data.data.tel,
         });
+
+        const payementAsyncChecker =
+          await PaiementService.checkTransactionStatusAsync(
+            externalTransactionId,
+            `${configService.callBackBaseUrl}/${externalTransactionId}?state=success`
+          );
+          console.log(payementAsyncChecker);
 
         setTransactionAllInfo(response.data.data);
         setIsProcessing(false);

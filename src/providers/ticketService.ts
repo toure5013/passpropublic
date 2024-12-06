@@ -21,6 +21,7 @@ class TicketService {
       return error.response;
     }
   }
+  
 
   // Method to buy a ticket
   static async buyTicket(data: Record<string, any>): Promise<AxiosResponse> {

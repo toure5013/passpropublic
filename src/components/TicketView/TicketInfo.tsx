@@ -7,7 +7,7 @@ interface TicketInfoProps {
   location: string;
   ticketType: string;
   ticketId: number;
-  price?: string;
+  price: string;
 }
 
 export default function TicketInfo({ 
@@ -16,7 +16,7 @@ export default function TicketInfo({
   location, 
   ticketType, 
   ticketId,
-  price = "5000 F CFA"
+  price
 }: TicketInfoProps) {
   return (
     <div className="space-y-6 mb-8">
