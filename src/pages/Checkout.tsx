@@ -36,9 +36,8 @@ export default function Checkout() {
   const handleTicketOwnerInfoSubmit = async (
     tickerOwnerInfo: TicketOwnerInfoType
   ) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
       if (!isLoggedIn || !userInfo.user_uuid) {
         await handleSendOtp(tickerOwnerInfo);
       }
@@ -58,7 +57,7 @@ export default function Checkout() {
     } catch (error) {
       console.log("error");
       console.log(error);
-
+      toast.error("Une erreur s'est produite. Veuillez recommencer.");
       setIsLoading(false);
     }
   };
