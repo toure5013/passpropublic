@@ -166,16 +166,15 @@ export default function PaymentMethod({
         const payementAsyncChecker =
           await PaiementService.checkTransactionStatusAsync(
             externalTransactionId,
-            `${configService.callBackBaseUrl}/${externalTransactionId}?state=success`
+            // `${configService.callBackBaseUrl}/${externalTransactionId}?state=success`
+            `${configService.callBackBaseUrl}/paiement/succes`
           );
-          console.log(payementAsyncChecker);
+        console.log(payementAsyncChecker);
 
         setTransactionAllInfo(response.data.data);
         setIsProcessing(false);
         setPaymentStatus("processing");
 
-        // Activate payement checker
-        // payementCheckerTimer(5000);
       } else {
         setIsProcessing(false);
         toast.error(response.message);

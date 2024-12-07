@@ -30,50 +30,57 @@ export default function Checkout() {
 
   const { updateUserInfo, isLoggedIn, userInfo } = useAuthStore();
   const [ticketOwnerInfo, setTicketOwnerInfo] = useState(
-    userInfo ? userInfo : {}
+    userInfo && isLoggedIn ? userInfo : {}
   );
 
   const handleTicketOwnerInfoSubmit = async (
     tickerOwnerInfo: TicketOwnerInfoType
   ) => {
-    if (!isLoggedIn || !userInfo.user_uuid) {
-      await handleSendOtp();
+    try {
+      setIsLoading(true);
+
+      if (!isLoggedIn || !userInfo.user_uuid) {
+        await handleSendOtp(tickerOwnerInfo);
+      }
+
+      setTicketOwnerInfo({
+        user_uuid: userInfo.user_uuid ? userInfo.user_uuid : userInfo.uuid,
+        ...tickerOwnerInfo,
+      });
+
+      // update all cart items by adding user info
+      updateAllItemsOwnerInformation(tickerOwnerInfo);
+      console.log("tickerOwnerInfo >>>>>>", tickerOwnerInfo);
+
+      // Go to payement
+      setIsLoading(false);
       setCurrentStep("payment");
-      return;
+    } catch (error) {
+      console.log("error");
+      console.log(error);
+
+      setIsLoading(false);
     }
-
-    setTicketOwnerInfo({
-      user_uuid: userInfo.user_uuid,
-      tel: tickerOwnerInfo.tel,
-      name: tickerOwnerInfo.name,
-      surname: tickerOwnerInfo.surname,
-    });
-
-    // update all cart items by adding user info
-    updateUserInfo(tickerOwnerInfo);
-    updateAllItemsOwnerInformation(tickerOwnerInfo);
-
-    // Go to payement
-    setCurrentStep("payment");
   };
 
-  const handleSendOtp = async () => {
+  const handleSendOtp = async (_tickerOwnerInfo: TicketOwnerInfoType) => {
+    console.log("_tickerOwnerInfo.tel");
+    console.log(_tickerOwnerInfo.tel);
+
     try {
       const response: any = await UserService.register(
         {
-          tel: ticketOwnerInfo.tel,
-          name: ticketOwnerInfo.name ? ticketOwnerInfo.name : "",
-          password: ticketOwnerInfo.password ? ticketOwnerInfo.password : "",
-          c_password: ticketOwnerInfo.c_password
-            ? ticketOwnerInfo.c_password
-            : "",
-          surname: ticketOwnerInfo.surname ? ticketOwnerInfo.surname : "",
+          tel: _tickerOwnerInfo.tel,
+          name: _tickerOwnerInfo.name ? _tickerOwnerInfo.name : "",
+          password: "123456",
+          c_password: "123456",
+          surname: _tickerOwnerInfo.surname ? _tickerOwnerInfo.surname : "",
         },
         false
       );
 
       console.log(response);
-      
+
       if (response.success) {
         toast.success("Information enregistrée avec succès !");
 
@@ -87,17 +94,7 @@ export default function Checkout() {
 
         setTicketOwnerInfo({
           user_uuid: response.user.uuid,
-          tel: ticketOwnerInfo.tel,
-          name: ticketOwnerInfo.name ? ticketOwnerInfo.name : "",
-          surname: ticketOwnerInfo.surname ? ticketOwnerInfo.surname : "",
-        });
-
-        // update all cart items by adding user info
-        updateAllItemsOwnerInformation({
-          user_uuid: response.user.uuid,
-          tel: ticketOwnerInfo.tel,
-          name: ticketOwnerInfo.name ? ticketOwnerInfo.name : "",
-          surname: ticketOwnerInfo.surname ? ticketOwnerInfo.surname : "",
+          ...ticketOwnerInfo,
         });
       } else {
         toast.error(response.message);
@@ -111,19 +108,23 @@ export default function Checkout() {
     }
   };
 
-  useEffect(() => {
-    if (!isLoggedIn) {
-      //remove user info from local storage
-      // localStorage.removeItem("user_tel");
-      // localStorage.removeItem("user_uuid");
-      // localStorage.removeItem("user_name");
-      // localStorage.removeItem("user_surname");
-      // localStorage.removeItem("user");
-      // localStorage.removeItem("user_info");
-      // localStorage.removeItem("user_wallet");
-      // // updateUserInfo({});
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (!isLoggedIn) {
+  //     // remove user info from local storage
+  //     localStorage.removeItem("user_tel");
+  //     localStorage.removeItem("user_uuid");
+  //     localStorage.removeItem("user_name");
+  //     localStorage.removeItem("user_surname");
+  //     localStorage.removeItem("user");
+  //     localStorage.removeItem("user_info");
+  //     localStorage.removeItem("user_wallet");
+  //     updateUserInfo({});
+  //   }
+
+  //   console.log(ticketOwnerInfo)
+  //   console.log(userInfo)
+
+  // }, []);
 
   return (
     <div className="pt-4 sm:pt-6 pb-20">
