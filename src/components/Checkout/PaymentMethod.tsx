@@ -166,7 +166,7 @@ export default function PaymentMethod({
         const payementAsyncChecker =
           await PaiementService.checkTransactionStatusAsync(
             externalTransactionId,
-            // `${configService.callBackBaseUrl}/${externalTransactionId}?state=success`
+            // `${configService.callBackBaseUrl}/paiement/status/${externalTransactionId}?state=success`
             `${configService.callBackBaseUrl}/paiement/succes`
           );
         console.log(payementAsyncChecker);
