@@ -93,13 +93,14 @@ function AppContent() {
                       path="/paiement/status/:trid"
                       element={<PaymentSuccess />} //PaymentStatus
                     />
-                     <Route
+                    <Route
                       path="/paiement/status/paiement/succes"
                       element={<PaymentSuccess />} //
                     />
 
-                 
                     <Route path="/paiement/erreur" element={<PaymentError />} />
+
+                    <Route path="/*" element={<Home />} />
                   </Routes>
                 </CartTimerProvider>
               ) : (
