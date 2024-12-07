@@ -90,9 +90,13 @@ function AppContent() {
                       element={<PaymentSuccess />}
                     />
 
-                    <Route
+                    {/* <Route
                       path="/paiement/status/:trid"
                       element={<PaymentStatus />}
+                    /> */}
+                    <Route
+                      path="/paiement/status/:trid"
+                      element={<PaymentSuccess />}
                     />
 
                     <Route path="/paiement/erreur" element={<PaymentError />} />
