@@ -34,37 +34,11 @@ export default function Checkout() {
   );
 
   const handleTicketOwnerInfoSubmit = async (
-    tickerOwnerInfo: TicketOwnerInfoType
+    _tickerOwnerInfo: TicketOwnerInfoType
   ) => {
-    setIsLoading(true);
-    try {
-      if (!isLoggedIn || !userInfo.user_uuid) {
-        await handleSendOtp(tickerOwnerInfo);
-      }
-
-      setTicketOwnerInfo({
-        user_uuid: userInfo.user_uuid ? userInfo.user_uuid : userInfo.uuid,
-        ...tickerOwnerInfo,
-      });
-
-      // update all cart items by adding user info
-      updateAllItemsOwnerInformation(tickerOwnerInfo);
-      console.log("tickerOwnerInfo >>>>>>", tickerOwnerInfo);
-
-      // Go to payement
-      setIsLoading(false);
-      setCurrentStep("payment");
-    } catch (error) {
-      console.log("error");
-      console.log(error);
-      toast.error("Une erreur s'est produite. Veuillez recommencer.");
-      setIsLoading(false);
-    }
-  };
-
-  const handleSendOtp = async (_tickerOwnerInfo: TicketOwnerInfoType) => {
     console.log("_tickerOwnerInfo.tel");
     console.log(_tickerOwnerInfo.tel);
+    setIsLoading(true);
 
     try {
       const response: any = await UserService.register(
@@ -84,19 +58,28 @@ export default function Checkout() {
         toast.success("Information enregistrée avec succès !");
 
         // Set user infos
-        updateUserInfo({
-          user_uuid: response.user.uuid,
-          tel: ticketOwnerInfo.tel,
-          name: ticketOwnerInfo.name ? ticketOwnerInfo.name : "",
-          surname: ticketOwnerInfo.surname ? ticketOwnerInfo.surname : "",
-        });
+        if (!isLoggedIn) {
+          updateUserInfo({
+            user_uuid: response.user.uuid,
+            tel: _tickerOwnerInfo.tel,
+            name: _tickerOwnerInfo.name ? _tickerOwnerInfo.name : "",
+            surname: _tickerOwnerInfo.surname ? _tickerOwnerInfo.surname : "",
+          });
+        }
 
         setTicketOwnerInfo({
           user_uuid: response.user.uuid,
-          ...ticketOwnerInfo,
+          ..._tickerOwnerInfo,
         });
+
+        // Update cart owner informations
+        updateAllItemsOwnerInformation(_tickerOwnerInfo);
+        setCurrentStep("payment");
+        setIsLoading(false);
+        
       } else {
         toast.error(response.message);
+        setIsLoading(false);
       }
     } catch (error: any) {
       toast.error(
@@ -104,26 +87,9 @@ export default function Checkout() {
           ? error.message
           : "Une erreur s'est produite. Veuillez recommencer."
       );
+      setIsLoading(false);
     }
   };
-
-  // useEffect(() => {
-  //   if (!isLoggedIn) {
-  //     // remove user info from local storage
-  //     localStorage.removeItem("user_tel");
-  //     localStorage.removeItem("user_uuid");
-  //     localStorage.removeItem("user_name");
-  //     localStorage.removeItem("user_surname");
-  //     localStorage.removeItem("user");
-  //     localStorage.removeItem("user_info");
-  //     localStorage.removeItem("user_wallet");
-  //     updateUserInfo({});
-  //   }
-
-  //   console.log(ticketOwnerInfo)
-  //   console.log(userInfo)
-
-  // }, []);
 
   return (
     <div className="pt-4 sm:pt-6 pb-20">
