@@ -89,16 +89,16 @@ function AppContent() {
                       path="/paiement/succes"
                       element={<PaymentSuccess />}
                     />
-
-                    {/* <Route
-                      path="/paiement/status/:trid"
-                      element={<PaymentStatus />}
-                    /> */}
                     <Route
                       path="/paiement/status/:trid"
-                      element={<PaymentSuccess />}
+                      element={<PaymentSuccess />} //PaymentStatus
+                    />
+                     <Route
+                      path="/paiement/status/paiement/succes"
+                      element={<PaymentSuccess />} //
                     />
 
+                 
                     <Route path="/paiement/erreur" element={<PaymentError />} />
                   </Routes>
                 </CartTimerProvider>
