@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PaiementService from "../../providers/paiementService";
 import { toast } from "react-toastify";
@@ -90,12 +90,16 @@ export default function PaymentMethod({
   const handlePayment = async () => {
     if (!selectedMethod || isProcessing) return;
 
+    console.log("userInfo");
+    console.log(userInfo);
+    
+
     // Is already conneceted
     setIsProcessing(true);
 
     try {
       const payload = {
-        user_uuid: userInfo.user_uuid,
+        user_uuid: userInfo.uuid || userInfo.user_uuid,
         number_to_debit: payment_number,
         platform: selectedMethod.id,
         amount: amount,
@@ -190,6 +194,10 @@ export default function PaymentMethod({
       navigate("/paiement/erreur");
     }
   };
+
+  useEffect(() => {
+    console.log(userInfo)
+  })
 
   return (
     <div>
