@@ -9,6 +9,7 @@ import { useEventStore } from '../store/eventStore';
 import { configService } from '../providers/configService';
 import CartTimer from '../components/CartTimer';
 import { toast } from 'react-toastify';
+import PaiementService from '../providers/paiementService';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -29,11 +30,58 @@ export default function Cart() {
   } = useCartStore();
 
   const [promoInput, setPromoInput] = useState('');
-  const [promoError, setPromoError] = useState('');
+  const [promoError, setPromoError] = useState('true');
   const [event, setEvent] = React.useState<MyCustomEvent>({} as MyCustomEvent);
   const { getEventById } = useEventStore();
+  const [codePromoInfo, setCodePromoInfo] = useState({});
 
   
+
+
+  async function applyCodePromoInfo(userUuid : any, eventId : any){
+   
+    try {
+      const response: any =  await PaiementService.applyCodePromo(userUuid, eventId, promoInput);
+
+      if (response.success) {
+        return response.data;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching user by phone number:", error);
+      return null;
+    }
+
+  }
+
+  
+  async function checkCodePromoInfo(){
+    try {
+      const response: any =  await PaiementService.checkCodePromoInfo(promoInput);
+
+      if (response.success) {
+        console.log();
+
+
+        // todo check if the user has the correponding event in his cart
+   
+
+        // call apply promo code api 
+        const responseApplyPromoCode  = await applyCodePromoInfo("userUuid", "eventId")
+
+        // apply promo code locally
+        await handleApplyPromo()
+        
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error("Error fetching user by phone number:", error);
+      return null;
+    }
+  }
+
   function getEventByIdAsync(id: number) {
     const _event:MyCustomEvent =  getEventById(+id);
     return _event;
@@ -203,7 +251,7 @@ export default function Cart() {
                   )}
                 </div>
                 <button
-                  onClick={handleApplyPromo}
+                  onClick={checkCodePromoInfo}
                   className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
                 >
                   Appliquer

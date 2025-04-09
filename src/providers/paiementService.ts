@@ -83,6 +83,49 @@ class PaiementService {
     }
 
   
+  
+  // Méthode pour obtenir les historiques
+  static async checkCodePromoInfo(code: string): Promise<AxiosResponse> {
+    try {
+      const response: AxiosResponse = await axios.post(
+        `${this.baseURL}/api/getCodePromoInfo`,
+        {
+          code: code
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response;
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
+
+
+  // Méthode pour obtenir les historiques
+  static async applyCodePromo(userUuid: string, eventId: any, code: string): Promise<AxiosResponse> {
+    try {
+      const response: AxiosResponse = await axios.post(
+        `${this.baseURL}/api/usePromotionalCode`,
+        {
+          user_uuid: userUuid,
+          event_id: eventId,
+          code: code
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      return response;
+    } catch (error) {
+      return this.handleError(error);
+    }
+  }
 
   // Méthode pour obtenir les historiques
   static async getHistoriques(userUuid: string): Promise<AxiosResponse> {
