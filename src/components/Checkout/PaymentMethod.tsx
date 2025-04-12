@@ -83,7 +83,7 @@ export default function PaymentMethod({
 
   const [instructions, setInstructions] = useState({} as PayementInstructions);
 
-  const [ setTransactionLocalInformation] =
+  const [transactionLocalInformation, setTransactionLocalInformation] =
     useState({} as any);
 
   // Payement and payement status checker
@@ -166,6 +166,9 @@ export default function PaymentMethod({
           transactionId: response.data.data.transactionId,
           tel: response.data.data.tel,
         });
+
+        console.log(transactionLocalInformation);
+        
 
         const payementAsyncChecker =
           await PaiementService.checkTransactionStatusAsync(

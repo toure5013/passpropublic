@@ -32,7 +32,6 @@ export default function Cart() {
 
   const [promoInput, setPromoInput] = useState("");
   const [promoError, setPromoError] = useState("true");
-  // const [event, setEvent] = React.useState<MyCustomEvent>({} as MyCustomEvent);
   const { getEventById } = useEventStore();
   const { userInfo } = useAuthStore();
 
@@ -178,7 +177,7 @@ export default function Cart() {
                     <div className="flex justify-between items-start">
                       <div className="min-w-0">
                         <h3 className="text-sm font-semibold text-gray-900 mb-0.5 truncate">
-                          {getEventByIdAsync(item.id).event_name}
+                          {getEventByIdAsync(item.id) ? getEventByIdAsync(item.id).event_name : ""}
                         </h3>
                         <p className="text-xs text-gray-600 mb-2">
                           Catégorie: {item.price_label}
