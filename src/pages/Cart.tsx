@@ -1,117 +1,124 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Minus, Plus, Trash2, Tag, X, LinkIcon } from 'lucide-react';
-import { useCartStore } from '../store/cartStore';
-import { motion, AnimatePresence } from 'framer-motion';
-import ImageLoader from '../components/ImageLoader';
-import { MyCustomEvent } from '../utils/eventtypes';
-import { useEventStore } from '../store/eventStore';
-import { configService } from '../providers/configService';
-import CartTimer from '../components/CartTimer';
-import { toast } from 'react-toastify';
-import PaiementService from '../providers/paiementService';
+import  { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Minus, Plus, Trash2, Tag, X, LinkIcon } from "lucide-react";
+import { useCartStore } from "../store/cartStore";
+import { motion, AnimatePresence } from "framer-motion";
+import ImageLoader from "../components/ImageLoader";
+import { MyCustomEvent } from "../utils/eventtypes";
+import { useEventStore } from "../store/eventStore";
+import { configService } from "../providers/configService";
+import CartTimer from "../components/CartTimer";
+import { toast } from "react-toastify";
+import PaiementService from "../providers/paiementService";
+import useAuthStore from "../store/loginStore";
 
 export default function Cart() {
   const navigate = useNavigate();
 
-  const { 
-    items, 
-    removeFromCart, 
-    updateQuantity, 
-    getTotal, 
+  const {
+    items,
+    removeFromCart,
+    updateQuantity,
+    getTotal,
     getFinalTotal,
     promoCode,
-    promoDiscount,
+    promoDiscountAmount,
     applyPromoCode,
     removePromoCode,
     acceptTerms,
     setAcceptTerms,
-    clearCart
+    clearCart,
   } = useCartStore();
 
-  const [promoInput, setPromoInput] = useState('');
-  const [promoError, setPromoError] = useState('true');
-  const [event, setEvent] = React.useState<MyCustomEvent>({} as MyCustomEvent);
+  const [promoInput, setPromoInput] = useState("");
+  const [promoError, setPromoError] = useState("true");
+  // const [event, setEvent] = React.useState<MyCustomEvent>({} as MyCustomEvent);
   const { getEventById } = useEventStore();
-  const [codePromoInfo, setCodePromoInfo] = useState({});
+  const { userInfo } = useAuthStore();
 
-  
-
-
-  async function applyCodePromoInfo(userUuid : any, eventId : any){
-   
-    try {
-      const response: any =  await PaiementService.applyCodePromo(userUuid, eventId, promoInput);
-
-      if (response.success) {
-        return response.data;
-      } else {
-        return null;
-      }
-    } catch (error) {
-      console.error("Error fetching user by phone number:", error);
-      return null;
-    }
-
+  function handlePromoError(message: string) {
+    toast.error(message, { autoClose: 1000 });
+    setPromoError(message);
   }
 
-  
-  async function checkCodePromoInfo(){
+  async function checkCodePromoInfo() {
     try {
-      const response: any =  await PaiementService.checkCodePromoInfo(promoInput);
+      const response: any = await PaiementService.checkCodePromoInfo(
+        promoInput
+      );
 
-      if (response.success) {
-        console.log();
+      if (!response.success) {
+        handlePromoError("Erreur lors de la vérification du code promo !");
+        return;
+      }
 
+      const ticketInfo = response.data;
+      const codePromoEvent = response.data.event;
 
-        // todo check if the user has the correponding event in his cart
-   
+      setPromoError("");
 
-        // call apply promo code api 
-        const responseApplyPromoCode  = await applyCodePromoInfo("userUuid", "eventId")
+      const eventInCart = items.find((item) => item.id === codePromoEvent.id);
+      if (!eventInCart) {
+        handlePromoError(
+          "Ce code ne peut pas être utilisé pour ces évènements !"
+        );
+        return;
+      }
 
-        // apply promo code locally
-        await handleApplyPromo()
-        
-      } else {
-        return null;
+      await applyPromoCodeToCart(ticketInfo);
+    } catch (error) {
+      console.error("Error checkCodePromoInfo:", error);
+      handlePromoError("Code promo invalide");
+    }
+  }
+
+  async function applyPromoCodeToCart(codePromoInfo: any) {
+    try {
+      const response: any = await PaiementService.applyCodePromo(
+        userInfo.userUuid,
+        codePromoInfo.event.id,
+        promoInput
+      );
+
+      if (!response.success) {
+        handlePromoError("Erreur lors de l'application du code promo !");
+        return;
+      }
+
+      toast.success("Code promo appliqué avec succès !", { autoClose: 1000 });
+
+      const success = applyPromoCode(
+        promoInput,
+        codePromoInfo.discount,
+        codePromoInfo,
+        codePromoInfo.status
+      );
+
+      if (success) {
+        setPromoInput("");
+        setPromoError("");
       }
     } catch (error) {
-      console.error("Error fetching user by phone number:", error);
-      return null;
+      console.error("Error applying promo code:", error);
+      handlePromoError("Erreur lors de l'application du code promo !");
     }
   }
 
   function getEventByIdAsync(id: number) {
-    const _event:MyCustomEvent =  getEventById(+id);
+    const _event: MyCustomEvent = getEventById(+id);
     return _event;
   }
 
-  const handleApplyPromo = () => {
-    if (!promoInput.trim()) {
-      setPromoError('Veuillez entrer un code promo');
-      return;
-    }
-
-    const success = applyPromoCode(promoInput);
-    if (success) {
-      setPromoError('');
-      setPromoInput('');
-    } else {
-      setPromoError('Code promo invalide');
-    }
-  };
-
   const handleCartExpire = () => {
     clearCart();
-    navigate('/');
+    navigate("/");
   };
 
   if (items.length === 0) {
     return (
       <div className="pt-4 sm:pt-6">
         <div className="max-w-lg mx-auto px-3 sm:px-4">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-lg shadow-sm p-4 sm:p-6 text-center"
@@ -137,18 +144,17 @@ export default function Cart() {
   return (
     <div className="pt-4 sm:pt-6">
       <div className="max-w-lg mx-auto px-3 sm:px-4">
-      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4">
           <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
             Tickets sélectionnés
           </h1>
           <CartTimer onExpire={handleCartExpire} />
         </div>
 
-
         <AnimatePresence>
           <div className="space-y-3 sm:space-y-4">
             {items.map((item) => (
-              <motion.div 
+              <motion.div
                 key={`${item.id}-${item.ticketPriceId}`}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -157,11 +163,15 @@ export default function Cart() {
               >
                 <div className="flex gap-2 p-2 sm:p-3">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-lg overflow-hidden">
-                    {item ? <ImageLoader
-                       src={configService.baseUrlImage + item.event_ticket_img}
-                       alt={item.event_name}
-                      className="w-full h-full object-cover"
-                    /> : ''}
+                    {item ? (
+                      <ImageLoader
+                        src={configService.baseUrlImage + item.event_ticket_img}
+                        alt={item.event_name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      ""
+                    )}
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -175,7 +185,9 @@ export default function Cart() {
                         </p>
                       </div>
                       <button
-                        onClick={() => removeFromCart(item.id, item.ticketPriceId)}
+                        onClick={() =>
+                          removeFromCart(item.id, item.ticketPriceId)
+                        }
                         className="text-gray-400 hover:text-gray-500 ml-2"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -185,7 +197,13 @@ export default function Cart() {
                     <div className="flex justify-between items-center">
                       <div className="flex items-center space-x-2">
                         <button
-                          onClick={() => updateQuantity(item.id, item.ticketPriceId, item.quantity - 1)}
+                          onClick={() =>
+                            updateQuantity(
+                              item.id,
+                              item.ticketPriceId,
+                              item.quantity - 1
+                            )
+                          }
                           className="p-1 rounded-md hover:bg-gray-100"
                           disabled={item.quantity <= 1}
                         >
@@ -195,7 +213,13 @@ export default function Cart() {
                           {item.quantity}
                         </span>
                         <button
-                          onClick={() => updateQuantity(item.id, item.ticketPriceId, item.quantity + 1)}
+                          onClick={() =>
+                            updateQuantity(
+                              item.id,
+                              item.ticketPriceId,
+                              item.quantity + 1
+                            )
+                          }
                           className="p-1 rounded-md hover:bg-gray-100"
                           disabled={item.quantity >= 10}
                         >
@@ -213,20 +237,22 @@ export default function Cart() {
           </div>
         </AnimatePresence>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mt-4 sm:mt-6 space-y-4"
         >
           {/* Code Promo */}
           <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4">
-            <h3 className="text-sm font-medium text-gray-900 mb-3">Code promo</h3>
+            <h3 className="text-sm font-medium text-gray-900 mb-3">
+              Code promo
+            </h3>
             {promoCode ? (
               <div className="flex items-center justify-between bg-brand-yellow/10 rounded-lg px-3 py-2">
                 <div className="flex items-center gap-2">
                   <Tag className="h-4 w-4 text-brand-red" />
                   <span className="text-sm font-medium text-brand-red">
-                    {promoCode} (-{promoDiscount}%)
+                    {promoCode} (-{promoDiscountAmount} F CFA)
                   </span>
                 </div>
                 <button
@@ -242,7 +268,9 @@ export default function Cart() {
                   <input
                     type="text"
                     value={promoInput}
-                    onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                    onChange={(e) =>
+                      setPromoInput(e.target.value.toUpperCase())
+                    }
                     placeholder="Entrez votre code"
                     className="w-full px-3 py-2 text-sm input-gradient-focus"
                   />
@@ -269,11 +297,11 @@ export default function Cart() {
                   {getTotal().toLocaleString()} F CFA
                 </span>
               </div>
-              {promoDiscount > 0 && (
+              {promoDiscountAmount > 0 && (
                 <div className="flex justify-between items-center text-brand-red">
                   <span className="text-sm">Réduction</span>
                   <span className="text-sm font-medium">
-                    -{(getTotal() * promoDiscount / 100).toLocaleString()} F CFA
+                    -{promoDiscountAmount.toLocaleString()} F CFA
                   </span>
                 </div>
               )}
@@ -285,7 +313,6 @@ export default function Cart() {
               </div>
             </div>
 
-
             <label className="flex items-start gap-2 text-left mb-4">
               <input
                 type="checkbox"
@@ -294,9 +321,9 @@ export default function Cart() {
                 className="mt-1 h-4 w-4 text-brand-red border-gray-300 rounded focus:ring-brand-red"
               />
               <span className="text-sm text-gray-600">
-                En poursuivant, j'accepte les{' '}
-                <a 
-                  href="/conditions" 
+                En poursuivant, j'accepte les{" "}
+                <a
+                  href="/conditions"
                   target="_blank"
                   className="text-brand-red hover:text-brand-red/80 font-medium inline-flex items-center gap-0.5"
                 >
@@ -305,13 +332,15 @@ export default function Cart() {
                 </a>
               </span>
             </label>
-            
+
             <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => {
-                  if (!acceptTerms) {
-                    toast.error("Veuillez accepter les conditions d'utilisation", {
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => {
+                if (!acceptTerms) {
+                  toast.error(
+                    "Veuillez accepter les conditions d'utilisation",
+                    {
                       autoClose: 1000,
                       hideProgressBar: false,
                       closeOnClick: true,
@@ -319,18 +348,18 @@ export default function Cart() {
                       draggable: true,
                       progress: undefined,
                       theme: "light",
-                    });
-                    return
-                  }
+                    }
+                  );
+                  return;
+                }
 
-                  navigate("/checkout")
-                }}
-                className="block w-full text-center bg-brand-button rounded-brand text-white py-2.5 text-sm font-medium hover:opacity-90 transition-opacity"
-                // disabled={!acceptTerms}
-              >
-                Procéder au paiement
-              </motion.button>
-              
+                navigate("/checkout");
+              }}
+              className="block w-full text-center bg-brand-button rounded-brand text-white py-2.5 text-sm font-medium hover:opacity-90 transition-opacity"
+              // disabled={!acceptTerms}
+            >
+              Procéder au paiement
+            </motion.button>
           </div>
         </motion.div>
       </div>

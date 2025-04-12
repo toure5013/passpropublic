@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import  { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PaymentMethod from "../components/Checkout/PaymentMethod";
 import { useCartStore } from "../store/cartStore";
@@ -7,9 +7,6 @@ import { toast } from "react-toastify";
 import useAuthStore from "../store/loginStore";
 import CartTimer from "../components/CartTimer";
 import TicketOwnerInfo from "../components/Checkout/TicketOwnerInfo";
-import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, Smartphone } from "lucide-react";
-import CodeInput from "../components/CodeInput";
 
 type CheckoutStep = "personal-info" | "payment";
 

@@ -84,7 +84,7 @@ class PaiementService {
 
   
   
-  // Méthode pour obtenir les historiques
+  // Méthode pour obtenir les infos de code promo
   static async checkCodePromoInfo(code: string): Promise<AxiosResponse> {
     try {
       const response: AxiosResponse = await axios.post(
@@ -105,7 +105,7 @@ class PaiementService {
   }
 
 
-  // Méthode pour obtenir les historiques
+  // Méthode pour apppliquer code promo
   static async applyCodePromo(userUuid: string, eventId: any, code: string): Promise<AxiosResponse> {
     try {
       const response: AxiosResponse = await axios.post(

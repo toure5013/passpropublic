@@ -83,7 +83,7 @@ export default function PaymentMethod({
 
   const [instructions, setInstructions] = useState({} as PayementInstructions);
 
-  const [transactionLocalInformation, setTransactionLocalInformation] =
+  const [ setTransactionLocalInformation] =
     useState({} as any);
 
   // Payement and payement status checker

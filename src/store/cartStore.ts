@@ -46,8 +46,10 @@ export type CartItem = {
 interface CartStore {
   items: CartItem[];
   promoCode: string | null;
-  promoDiscount: number;
+  promoDiscountAmount: number;
   acceptTerms: boolean;
+  codePromoInfo: any;
+  codePromoStatus: string;
   addToCart: (item: CartItem) => void;
   updateAllItemsOwnerInformation: (ticketOwnerInfo: any) => void;
   addOneToCartMutiple: (item: CartItem) => void;
@@ -61,24 +63,28 @@ interface CartStore {
   clearCart: () => void;
   getTotal: () => number;
   getFinalTotal: () => number;
-  applyPromoCode: (code: string) => boolean;
+  applyPromoCode: (code: string, promoDiscountAmount : number, codePromoInfo : any, codePromoStatus : string,) => boolean;
   removePromoCode: () => void;
   setAcceptTerms: (value: boolean) => void;
-}
+  setCodePromoInfo: (codePromoInfo: any) => void;
 
-const PROMO_CODES: any = {
-  WELCOME: 10, // 10% de réduction
-  SUMMER: 15, // 15% de réduction
-  VIP: 20, // 20% de réduction
-};
+}
 
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
+      
       items: [],
       promoCode: null,
-      promoDiscount: 0,
+      promoDiscountAmount: 0,
       acceptTerms: false,
+      codePromoInfo : {},
+      codePromoStatus : "",
+
+
+      setCodePromoInfo: (codePromoInfo) => {
+        set({ codePromoInfo });
+      },
       setAcceptTerms: (value) => {
         set({ acceptTerms: value });
       },
@@ -149,7 +155,7 @@ export const useCartStore = create<CartStore>()(
 
       removeAllItems: () => set({ items: [] }),
 
-      clearCart: () => set({ items: [], promoCode: null, promoDiscount: 0 }),
+      clearCart: () => set({ items: [], promoCode: null, promoDiscountAmount: 0 }),
 
       getTotal: () => {
         const { items } = get();
@@ -160,22 +166,21 @@ export const useCartStore = create<CartStore>()(
       },
 
       getFinalTotal: () => {
-        const { getTotal, promoDiscount } = get();
+        const { getTotal, promoDiscountAmount } = get();
         const total = getTotal();
-        return total - (total * promoDiscount) / 100;
+        return total - promoDiscountAmount;
       },
 
-      applyPromoCode: (code) => {
-        const discount = PROMO_CODES[code.toUpperCase()];
-        if (discount) {
-          set({ promoCode: code.toUpperCase(), promoDiscount: discount });
+      applyPromoCode: (_promoCode, _codePromoInfo, _promoDiscountAmount, _codePromoStatus) => {
+        if (_promoDiscountAmount) {
+          set({ promoCode: _promoCode, promoDiscountAmount: _promoDiscountAmount, codePromoInfo : _codePromoInfo, codePromoStatus : _codePromoStatus });
           return true;
         }
         return false;
       },
 
       removePromoCode: () => {
-        set({ promoCode: null, promoDiscount: 0 });
+        set({ promoCode: null, promoDiscountAmount: 0 });
       },
     }),
     {
